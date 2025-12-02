@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# MARK: Data Preparation
 # Load in MNIST data.
 
 def read_idx_images(filename):
@@ -31,9 +32,8 @@ test_labels = read_idx_labels('archive/t10k-labels.idx1-ubyte')
 train_images = train_images.astype(np.float32) / 255
 test_images = test_images.astype(np.float32) / 255
 
-# Get images for given labels.
-
 def get_images_for_digit(n):
+    'Get images for given labels.'
     return train_images[train_labels == n]
 
 # Choose digits to consider.
@@ -41,34 +41,50 @@ def get_images_for_digit(n):
 digits = [4, 7, 8]
 data = np.vstack([get_images_for_digit(n) for n in digits])
 
-# Calculate mean vector.
+# MARK: Computation
 
-total = np.zeros(784, dtype=np.float32)
-for img in data:
-    total += img.flatten()
-data_mean = total / len(data)
+def mean_vec(images):
+    'Calculate mean vector of a set of images (given as 2D arrays).'
+    total = np.zeros(784, dtype=np.float32)
+    for img in images:
+        total += img.flatten()
+    return total / len(images)
 
-# Calculate covariance matrix.
+def class_mean(n):
+    'Mean vector for images with a given label.'
+    return mean_vec(get_images_for_digit(n))
 
-total = np.zeros([784,784], dtype=np.float32)
-for img in data:
-    vec = img.flatten() - data_mean
-    total += np.outer(vec, vec)
-S = total / len(data)
+# Calculation mean vector for all images considered.
+
+data_mean = mean_vec(data)
+
+def covariance_matrix(images):
+    'Calculate covariance matrix of a set of images (given as 2D arrays).'
+    mean = mean_vec(images)
+    total = np.zeros([784,784], dtype=np.float32)
+    for img in images:
+        vec = img.flatten() - mean
+        total += np.outer(vec, vec)
+    return total / len(images)
+
+def class_cov_matrix(n):
+    'Covariance matrix for images with a given label.'
+    return covariance_matrix(get_images_for_digit(n))
+
+# Calculate covariance matrix for all images considered.
+
+S = covariance_matrix(data)
 
 # Diagonalize covariance matrix.
 
 S_vals, S_vecs = np.linalg.eigh(S)
-
-# Plot covariance matrix eigenvalues in descending order.
-
-plt.scatter(range(len(S_vals)), S_vals[::-1])
-plt.show()
-
-# Get matrix of eigenvectors corresponding to largest eigenvalues.
+idx = np.argsort(S_vals.real)[::-1]
+S_vals = S_vals[idx]
+S_vecs = S_vecs[:,idx]
 
 def A(n):
-    return S_vecs[:,-1:-n-1:-1].transpose()
+    'Get matrix of eigenvectors corresponding to largest eigenvalues.'
+    return S_vecs[:,:n].transpose()
 
 # Calculate total distortion error. Errors expected on first call; known bug with np.matmul and np.matvec on Apple Silicon.
 
@@ -82,31 +98,7 @@ def total_distortion_error(m):
         total += np.linalg.vector_norm(vec - np.matvec(double, vec) - bias) ** 2
     return total
 
-components_list = [2, 10, 50, 100, 200, 300]
-plt.scatter(components_list, [total_distortion_error(m) for m in components_list])
-plt.show()
-
-# Find the number of dimensions needed to keep 98% of total variance in the data.
-
-variances = S_vals[::-1].cumsum()
-eig_threshold = np.argmax(variances >= 0.98 * variances[-1])
-
 def lda_matrix(dim, shift):
-    def class_mean(n):
-        images = get_images_for_digit(n)
-        total = np.zeros(784, dtype=np.float32)
-        for img in images:
-            total += img.flatten()
-        return total / len(images)
-    
-    def class_cov_matrix(n):
-        cls_mean = class_mean(n)
-        images = get_images_for_digit(n)
-        total = np.zeros([784,784], dtype=np.float32)
-        for img in images:
-            vec = img.flatten() - cls_mean
-            total += np.outer(vec, vec)
-        return total / len(images)
     
     between_class_scatter_matrix = np.zeros([784,784], dtype=np.float32)
     for n in digits:
@@ -127,15 +119,36 @@ def pca_projected_images(n, dim):
     pca = A(dim)
     return [np.matvec(pca, img.flatten()) for img in images]
 
+def lda_projected_images(n, dim):
+    images = get_images_for_digit(n)
+    lda = lda_matrix(dim, 1e-4)
+    return [np.matvec(lda, img.flatten()) for img in images]
+
+# MARK: Visualization
+# Plot covariance matrix eigenvalues in descending order.
+
+plt.scatter(range(len(S_vals)), S_vals)
+plt.show()
+
+# Find the number of dimensions needed to keep 98% of total variance in the data.
+
+variances = S_vals.cumsum()
+eig_threshold = np.argmax(variances >= 0.98 * variances[-1])
+
+# Plot total distortion error with number of principal components kept.
+
+components_list = [2, 10, 50, 100, 200, 300]
+plt.scatter(components_list, [total_distortion_error(m) for m in components_list])
+plt.show()
+
+# Plot PCA projections in 2D.
+
 for n in digits:
     points = np.transpose(pca_projected_images(n, 2))
     plt.scatter(points[0], points[1], s=2)
 plt.show()
 
-def lda_projected_images(n, dim):
-    images = get_images_for_digit(n)
-    lda = lda_matrix(dim, 1e-4)
-    return [np.matvec(lda, img.flatten()) for img in images]
+# Plot LDA projections in 2D.
 
 for n in digits:
     points = np.transpose(lda_projected_images(n, 2))
