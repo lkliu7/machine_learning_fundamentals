@@ -36,6 +36,8 @@ test_images = test_images.astype(np.float32) / 255
 def get_images_for_digit(n):
     return train_images[train_labels == n]
 
+# Choose digits to consider.
+
 digits = [4, 7, 8]
 data = np.vstack([get_images_for_digit(n) for n in digits])
 
@@ -68,7 +70,7 @@ plt.show()
 def A(n):
     return S_vecs[:,-1:-n-1:-1].transpose()
 
-# Calculate total distortion error.
+# Calculate total distortion error. Errors expected on first call; known bug with np.matmul and np.matvec on Apple Silicon.
 
 def total_distortion_error(m):
     mat = A(m)
@@ -127,7 +129,7 @@ def pca_projected_images(n, dim):
 
 for n in digits:
     points = np.transpose(pca_projected_images(n, 2))
-    plt.scatter(points[0], points[1])
+    plt.scatter(points[0], points[1], s=2)
 plt.show()
 
 def lda_projected_images(n, dim):
@@ -137,5 +139,5 @@ def lda_projected_images(n, dim):
 
 for n in digits:
     points = np.transpose(lda_projected_images(n, 2))
-    plt.scatter(points[0], points[1])
+    plt.scatter(points[0].real, points[1].real, s=2)
 plt.show()
