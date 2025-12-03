@@ -1,10 +1,37 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import urllib.request
+import gzip
 
 # MARK: Data Preparation
+
+# Check whether MNIST data exists.
+
+def get_mnist_data():
+    paths = ['archive/train-labels.idx1-ubyte', 
+             'archive/train-images.idx3-ubyte', 
+             'archive/t10k-images.idx3-ubyte', 
+             'archive/t10k-labels.idx1-ubyte']
+    for path in paths:
+        if not os.path.exists(path):
+            file = path.removeprefix('archive/').replace('.','-') + '.gz'
+            file = urllib.request.urlretrieve('https://github.com/fgnt/mnist/raw/refs/heads/master/' + file)
+            out = open(path, 'wb')
+            with open(file[0], 'rb') as file:
+                out.write(gzip.decompress(file.read()))
+            out.close()
+
+
+if not os.path.exists('archive'):
+    os.mkdir('archive')
+
+get_mnist_data()
+
 # Load in MNIST data.
 
 def read_idx_images(filename):
+
     with open(filename, 'rb') as f:
         magic = int.from_bytes(f.read(4), 'big')
         num_images = int.from_bytes(f.read(4), 'big')
