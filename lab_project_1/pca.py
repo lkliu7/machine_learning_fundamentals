@@ -4,6 +4,14 @@ import os
 import urllib.request
 import gzip
 
+# MARK: Configuration
+CONFIG = {
+    'digits': range(10),
+    'variance_threshold': 0.98,
+    'lda_shift': 1e-4,
+    'pca_dims': [2, 10, 50, 100, 200, 300],
+}
+
 # MARK: Data Preparation
 
 # Check whether MNIST data exists.
@@ -67,7 +75,10 @@ def get_images_for_digit(n):
 
 # Choose digits to consider.
 
-digits = [4, 7, 8]
+digits = CONFIG['digits']
+digits = list(set(digits) & set(range(10)))
+if not digits:
+    raise ValueError('no valid digits in config')
 data = np.vstack([get_images_for_digit(n) for n in digits])
 
 # MARK: Computation
@@ -115,7 +126,9 @@ def A(n):
     'Get matrix of eigenvectors corresponding to largest eigenvalues.'
     return S_vecs[:,:n].transpose()
 
-# Calculate total distortion error. Errors expected on first call; known bug with np.matmul and np.matvec on Apple Silicon.
+# Calculate total distortion error. 
+# Benign warning messages expected on first call; 
+# known bug with np.matmul and np.matvec on Apple Silicon. Results not affected.
 
 def total_distortion_error(m):
     mat = A(m)
@@ -150,24 +163,32 @@ def pca_projected_images(n, dim):
 
 def lda_projected_images(n, dim):
     images = get_images_for_digit(n)
-    lda = lda_matrix(dim, 1e-4)
+    lda = lda_matrix(dim, CONFIG['lda_shift'])
     return [np.matvec(lda, img.flatten()) for img in images]
 
 # MARK: Visualization
 # Plot covariance matrix eigenvalues in descending order.
 
 plt.scatter(range(len(S_vals)), S_vals)
+plt.xlabel('index')
+plt.ylabel('eigenvalue')
+plt.title('Eigenvalues of total covariance matrix')
 plt.show()
 
 # Find the number of dimensions needed to keep 98% of total variance in the data.
 
 variances = S_vals.cumsum()
-eig_threshold = np.argmax(variances >= 0.98 * variances[-1])
+variance_threshold = CONFIG['variance_threshold']
+eig_threshold = np.argmax(variances >= variance_threshold * variances[-1])
+print(f'{variance_threshold} of variance captured with {eig_threshold + 1} eigenvalues')
 
 # Plot total distortion error with number of principal components kept.
 
-components_list = [2, 10, 50, 100, 200, 300]
+components_list = CONFIG['pca_dims']
 plt.scatter(components_list, [total_distortion_error(m) for m in components_list])
+plt.xlabel('PCA components')
+plt.ylabel('total distortion error')
+plt.title('Total distortion error for number of PCA vectors')
 plt.show()
 
 # Plot PCA projections in 2D.
@@ -175,6 +196,9 @@ plt.show()
 for n in digits:
     points = np.transpose(pca_projected_images(n, 2))
     plt.scatter(points[0], points[1], s=2)
+plt.xlabel('component along PCA vector 1')
+plt.ylabel('component along PCA vector 2')
+plt.title('PCA projections of digits.')
 plt.show()
 
 # Plot LDA projections in 2D.
@@ -182,4 +206,7 @@ plt.show()
 for n in digits:
     points = np.transpose(lda_projected_images(n, 2))
     plt.scatter(points[0].real, points[1].real, s=2)
+plt.xlabel('component along LDA vector 1')
+plt.ylabel('component along LDA vector 2')
+plt.title('LDA projections of digits.')
 plt.show()
