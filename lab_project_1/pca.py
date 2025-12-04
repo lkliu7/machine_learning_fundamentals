@@ -17,10 +17,8 @@ def get_mnist_data():
         if not os.path.exists(path):
             file = path.removeprefix('archive/').replace('.','-') + '.gz'
             file = urllib.request.urlretrieve('https://github.com/fgnt/mnist/raw/refs/heads/master/' + file)
-            out = open(path, 'wb')
-            with open(file[0], 'rb') as file:
-                out.write(gzip.decompress(file.read()))
-            out.close()
+            with open(file[0], 'rb') as gz, open(path, 'wb') as out:
+                out.write(gzip.decompress(gz.read()))
 
 
 if not os.path.exists('archive'):
@@ -34,6 +32,8 @@ def read_idx_images(filename):
 
     with open(filename, 'rb') as f:
         magic = int.from_bytes(f.read(4), 'big')
+        if magic != 2051:
+            raise ValueError(f"Invalid magic number for IDX3 file: expected 2051, got {magic}")
         num_images = int.from_bytes(f.read(4), 'big')
         num_rows = int.from_bytes(f.read(4), 'big')
         num_cols = int.from_bytes(f.read(4), 'big')
@@ -46,6 +46,8 @@ def read_idx_images(filename):
 def read_idx_labels(filename):
     with open(filename, 'rb') as f:
         magic = int.from_bytes(f.read(4), 'big')
+        if magic != 2049:
+            raise ValueError(f"Invalid magic number for IDX1 file: expected 2049, got {magic}")
         num_labels = int.from_bytes(f.read(4), 'big')
         labels = np.frombuffer(f.read(), dtype=np.uint8)
 
