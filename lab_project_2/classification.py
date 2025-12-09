@@ -76,7 +76,7 @@ def get_test_images_for_digit(n):
     return test_images[test_labels == n]
 
 digits = CONFIG['digits']
-digits = list(set(digits) & set(range(10)))
+digits = sorted(list(set(digits) & set(range(10))))
 if not digits:
     raise ValueError('no valid digits in config')
 data = np.vstack([get_train_images_for_digit(n) for n in digits])
