@@ -14,4 +14,10 @@ trainAcc1=N[Count[pred/@vec/@group[nums[[1]]],1]/Length[group[nums[[1]]]]]
 trainAcc2=N[Count[pred/@vec/@group[nums[[2]]],-1]/Length[group[nums[[2]]]]]
 testAcc1=N[Count[pred/@vec/@groupTest[nums[[1]]],1]/Length[groupTest[nums[[1]]]]]
 testAcc2=N[Count[pred/@vec/@groupTest[nums[[2]]],-1]/Length[groupTest[nums[[2]]]]]
+
+(* :!CodeAnalysis::BeginBlock:: *)
+(* :!CodeAnalysis::Disable::SuspiciousSessionSymbol:: *)
+
 Print[{trainAcc1,trainAcc2,testAcc1,testAcc2}]
+
+(* :!CodeAnalysis::EndBlock:: *)
