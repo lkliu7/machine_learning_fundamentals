@@ -6,7 +6,7 @@ import gzip
 
 # MARK: Configuration
 CONFIG = {
-    'digits': [6, 7],
+    'digits': [5, 8],
     'inverse_shift': 1e-2
 }
 
