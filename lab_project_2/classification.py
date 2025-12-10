@@ -81,6 +81,8 @@ if not digits:
     raise ValueError('no valid digits in config')
 data = np.vstack([get_train_images_for_digit(n) for n in digits])
 
+# MARK: Computation
+
 data = np.array([img.flatten() for img in data])
 lr_labels = np.concat([np.ones(len(get_train_images_for_digit(digits[0]))),
                        -np.ones(len(get_train_images_for_digit(digits[1])))])
@@ -89,6 +91,8 @@ shift = CONFIG['inverse_shift']
 w = np.linalg.inv(np.transpose(data) @ data + shift * np.eye(784)) @ np.transpose(data) @ lr_labels
 def pred(x):
     return np.sign(w.dot(x))
+
+# MARK: Results
 
 train_preds_0 = [pred(img.flatten()) for img in get_train_images_for_digit(digits[0])]
 train_preds_1 = [pred(img.flatten()) for img in get_train_images_for_digit(digits[1])]
