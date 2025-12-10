@@ -8,7 +8,7 @@ import gzip
 CONFIG = {
     'digits': [5, 8],
     'learning_rate': 1e-3,
-    'max_iterations': 10000,
+    'max_iterations': 1000,
     'convergence_tolerance': 1e-6
 }
 
@@ -125,21 +125,29 @@ for i in range(max_iterations):
         print(f'converged at iteration {i+1}')
         break
     prev_loss = current_loss
+    if i % 100 == 99:
+        print(i+1, 'iterations completed')
 
 def pred(x):
     return np.sign(-w.dot(x))
 
+def pred_data(data):
+    return np.sign(-data @ w)
+
+def pred_accuracy(results, label):
+    return (results == label).mean()
+
 # MARK: Results
 
-train_preds_0 = np.sign(-train_data[digits[0]] @ w)
-train_preds_1 = np.sign(-train_data[digits[1]] @ w)
-test_preds_0 = np.sign(-test_data[digits[0]] @ w)
-test_preds_1 = np.sign(-test_data[digits[1]] @ w)
+train_preds_0 = pred_data(train_data[digits[0]])
+train_preds_1 = pred_data(train_data[digits[1]])
+test_preds_0 = pred_data(test_data[digits[0]])
+test_preds_1 = pred_data(test_data[digits[1]])
 
-train_preds_0_acc = (train_preds_0 == 1).mean()
-train_preds_1_acc = (train_preds_1 == -1).mean()
-test_preds_0_acc = (test_preds_0 == 1).mean()
-test_preds_1_acc = (test_preds_1 == -1).mean()
+train_preds_0_acc = pred_accuracy(train_preds_0, 1)
+train_preds_1_acc = pred_accuracy(train_preds_1, -1)
+test_preds_0_acc = pred_accuracy(test_preds_0, 1)
+test_preds_1_acc = pred_accuracy(test_preds_1, -1)
 
 print([train_preds_0_acc, train_preds_1_acc, test_preds_0_acc, test_preds_1_acc])
 
