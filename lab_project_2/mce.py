@@ -73,21 +73,30 @@ def get_train_images_for_digit(n):
     'Get images for given labels.'
     return train_images[train_labels == n]
 
+def train_size(n):
+    'Number of training images for given label.'
+    return np.sum(train_labels == n)
+
 def get_test_images_for_digit(n):
     'Get images for given labels.'
     return test_images[test_labels == n]
+
+def test_size(n):
+    'Number of test images for given label.'
+    return np.sum(test_labels == n)
 
 digits = CONFIG['digits']
 digits = sorted(list(set(digits) & set(range(10))))
 if not digits:
     raise ValueError('no valid digits in config')
-data = np.vstack([get_train_images_for_digit(n) for n in digits])
+train_data = {d: np.array([img.flatten() for img in get_train_images_for_digit(d)]) for d in digits}
+test_data = {d: np.array([img.flatten() for img in get_test_images_for_digit(d)]) for d in digits}
 
 # MARK: Computation
 
-data = np.array([img.flatten() for img in data])
-lr_labels = np.concat([np.ones(len(get_train_images_for_digit(digits[0]))),
-                       -np.ones(len(get_train_images_for_digit(digits[1])))])
+data = np.vstack([train_data[n] for n in digits])
+lr_labels = np.concat([np.ones(train_size(digits[0])),
+                       -np.ones(train_size(digits[1]))])
 
 def l(x):
     return 1 / (1 + np.exp(-x))
@@ -122,15 +131,15 @@ def pred(x):
 
 # MARK: Results
 
-train_preds_0 = [pred(img.flatten()) for img in get_train_images_for_digit(digits[0])]
-train_preds_1 = [pred(img.flatten()) for img in get_train_images_for_digit(digits[1])]
-test_preds_0 = [pred(img.flatten()) for img in get_test_images_for_digit(digits[0])]
-test_preds_1 = [pred(img.flatten()) for img in get_test_images_for_digit(digits[1])]
+train_preds_0 = np.sign(-train_data[digits[0]] @ w)
+train_preds_1 = np.sign(-train_data[digits[1]] @ w)
+test_preds_0 = np.sign(-test_data[digits[0]] @ w)
+test_preds_1 = np.sign(-test_data[digits[1]] @ w)
 
-train_preds_0_acc = train_preds_0.count(1) / len(train_preds_0)
-train_preds_1_acc = train_preds_1.count(-1) / len(train_preds_1)
-test_preds_0_acc = test_preds_0.count(1) / len(test_preds_0)
-test_preds_1_acc = test_preds_1.count(-1) / len(test_preds_1)
+train_preds_0_acc = (train_preds_0 == 1).mean()
+train_preds_1_acc = (train_preds_1 == -1).mean()
+test_preds_0_acc = (test_preds_0 == 1).mean()
+test_preds_1_acc = (test_preds_1 == -1).mean()
 
 print([train_preds_0_acc, train_preds_1_acc, test_preds_0_acc, test_preds_1_acc])
 
