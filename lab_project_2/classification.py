@@ -7,7 +7,10 @@ import gzip
 # MARK: Configuration
 CONFIG = {
     'digits': [5, 8],
-    'inverse_shift': 1e-2
+    'inverse_shift': 1e-2,
+    'learning_rate': 1e-6,
+    'max_iterations': 10000,
+    'convergence_tolerance': 1e-6,
 }
 
 # MARK: Data Preparation
@@ -71,37 +74,106 @@ def get_train_images_for_digit(n):
     'Get images for given labels.'
     return train_images[train_labels == n]
 
+def train_size(n):
+    'Number of training images for given label.'
+    return np.sum(train_labels == n)
+
 def get_test_images_for_digit(n):
     'Get images for given labels.'
     return test_images[test_labels == n]
+
+def test_size(n):
+    'Number of test images for given label.'
+    return np.sum(test_labels == n)
 
 digits = CONFIG['digits']
 digits = sorted(list(set(digits) & set(range(10))))
 if not digits:
     raise ValueError('no valid digits in config')
-data = np.vstack([get_train_images_for_digit(n) for n in digits])
+train_data = {d: np.array([img.flatten() for img in get_train_images_for_digit(d)]) for d in digits}
+test_data = {d: np.array([img.flatten() for img in get_test_images_for_digit(d)]) for d in digits}
+
 
 # MARK: Computation
 
-data = np.array([img.flatten() for img in data])
-lr_labels = np.concat([np.ones(len(get_train_images_for_digit(digits[0]))),
-                       -np.ones(len(get_train_images_for_digit(digits[1])))])
+data = np.vstack([train_data[n] for n in digits])
+lr_labels = np.concat([np.ones(train_size(digits[0])),
+                       -np.ones(train_size(digits[1]))])
+
+# Exact solution.
 
 shift = CONFIG['inverse_shift']
-w = np.linalg.inv(np.transpose(data) @ data + shift * np.eye(784)) @ np.transpose(data) @ lr_labels
-def pred(x):
-    return np.sign(w.dot(x))
+w_exact = np.linalg.inv(np.transpose(data) @ data + shift * np.eye(784)) @ np.transpose(data) @ lr_labels
+def pred_exact(x):
+    return np.sign(w_exact.dot(x))
+
+# Gradient descent method.
+
+def error(w):
+    vec = data @ w - lr_labels
+    return vec @ vec
+
+yX_vec = 2 * lr_labels @ data
+XTX = data.T @ data
+def grad(w):
+    return 2 * XTX @ w - yX_vec
+
+lr = CONFIG['learning_rate']
+max_iterations = CONFIG['max_iterations']
+w = np.zeros(784)
+prev_loss = float('inf')
+loss_history = [(0,error(w))]
+tol = CONFIG['convergence_tolerance']
+
+for i in range(max_iterations):
+    w -= lr * grad(w)
+    current_loss = error(w)
+    loss_history.append((i+1, current_loss))
+    if abs(prev_loss/current_loss - 1) < tol:
+        print(f'converged at iteration {i+1}')
+        break
+    prev_loss = current_loss
+    if i % 100 == 99:
+        print(i+1, 'iterations completed')
+
+def pred_data(data, w):
+    return np.sign(data @ w)
+
+def pred_accuracy(results, label):
+    return (results == label).mean()
 
 # MARK: Results
 
-train_preds_0 = [pred(img.flatten()) for img in get_train_images_for_digit(digits[0])]
-train_preds_1 = [pred(img.flatten()) for img in get_train_images_for_digit(digits[1])]
-test_preds_0 = [pred(img.flatten()) for img in get_test_images_for_digit(digits[0])]
-test_preds_1 = [pred(img.flatten()) for img in get_test_images_for_digit(digits[1])]
+train_preds_0 = pred_data(train_data[digits[0]], w_exact)
+train_preds_1 = pred_data(train_data[digits[1]], w_exact)
+test_preds_0 = pred_data(test_data[digits[0]], w_exact)
+test_preds_1 = pred_data(test_data[digits[1]], w_exact)
 
-train_preds_0_acc = train_preds_0.count(1) / len(train_preds_0)
-train_preds_1_acc = train_preds_1.count(-1) / len(train_preds_1)
-test_preds_0_acc = test_preds_0.count(1) / len(test_preds_0)
-test_preds_1_acc = test_preds_1.count(-1) / len(test_preds_1)
+train_preds_0_acc = pred_accuracy(train_preds_0, 1)
+train_preds_1_acc = pred_accuracy(train_preds_1, -1)
+test_preds_0_acc = pred_accuracy(test_preds_0, 1)
+test_preds_1_acc = pred_accuracy(test_preds_1, -1)
 
 print([train_preds_0_acc, train_preds_1_acc, test_preds_0_acc, test_preds_1_acc])
+
+train_preds_0 = pred_data(train_data[digits[0]], w)
+train_preds_1 = pred_data(train_data[digits[1]], w)
+test_preds_0 = pred_data(test_data[digits[0]], w)
+test_preds_1 = pred_data(test_data[digits[1]], w)
+
+train_preds_0_acc = pred_accuracy(train_preds_0, 1)
+train_preds_1_acc = pred_accuracy(train_preds_1, -1)
+test_preds_0_acc = pred_accuracy(test_preds_0, 1)
+test_preds_1_acc = pred_accuracy(test_preds_1, -1)
+
+print([train_preds_0_acc, train_preds_1_acc, test_preds_0_acc, test_preds_1_acc])
+
+iters, losses = zip(*loss_history)
+
+plt.plot(iters, losses)
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
+plt.title("Loss History")
+plt.yscale('log')
+plt.grid(True)
+plt.show()
