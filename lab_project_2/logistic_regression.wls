@@ -6,6 +6,7 @@ groupTest[i_]:=groupTest[i]=Select[mnistTest,#[[2]]==i&][[All,1]]
 testSize[i_]:=testSize[i]=Length[groupTest[i]]
 nums={5,8};
 data=Join@@group/@nums;
+n=Total[trainSize/@nums];
 vec[img_]:=1-Flatten[ImageData[img]]
 oneminuslC=Compile[{{x,_Real,1}},1-1/(1+E^-x)];
 llC=Compile[{{x,_Real,1}},Log[1/(1+E^-x)]];
@@ -24,15 +25,35 @@ tol=10^-6;
 Print[0," ",prevError=error[w]]
 AbsoluteTiming[Do[w-=lr grad[w];
 currentError=error[w];
-If[Mod[i,100]==0,Print[i," ",error[w]]];
+If[Mod[i,1000]==0,Print[i," ",currentError]];
 If[Abs[prevError/currentError-1]<tol,Print["converged at iteration ", i];Break[]];
 prevError=currentError,{i,iters}]]
-pred[x_]:=Sign[w.x]
-predData[data_]:=Sign[data.w]
+batchSize=64;
+batchGrad[w_,vecs_,labels_]:=Block[{p=oneminuslC[labels vecs.w]},-(labels p).vecs]
+batchSGD[batchSize_,lr_]:=Block[{batches=Partition[RandomSample[Range[n]],batchSize]},
+Do[wSGD-=lr batchGrad[wSGD,X[[batch]],y[[batch]]],{batch,batches}]]
+lr=1 10^-4;
+iters=100000;
+wSGD=ConstantArray[0,784];
+tol=10^-6;
+Print[0," ",prevError=error[wSGD]]
+AbsoluteTiming[Do[batchSGD[batchSize,lr];
+currentError=error[wSGD];
+If[Mod[i,1000]==0,Print[i," ",currentError]];
+If[Abs[prevError/currentError-1]<tol,Print["converged at iteration ", i];Break[]];
+prevError=currentError,{i,iters}]]
+pred[w_,x_]:=Sign[w.x]
+predData[w_,data_]:=Sign[data.w]
 trainAcc1=N[Count[predData[w,X[[;;trainSize[nums[[1]]]]]],1]/trainSize[nums[[1]]]]
 trainAcc2=N[Count[predData[w,X[[-trainSize[nums[[2]]];;]]],-1]/trainSize[nums[[2]]]]
 testAcc1=N[Count[predData[w,(vec/@groupTest[nums[[1]]])],1]/testSize[nums[[1]]]]
 testAcc2=N[Count[predData[w,(vec/@groupTest[nums[[2]]])],-1]/testSize[nums[[2]]]]
+trainAccSGD1=N[Count[predData[wSGD,X[[;;trainSize[nums[[1]]]]]],1]/trainSize[nums[[1]]]]
+trainAccSGD2=N[Count[predData[wSGD,X[[-trainSize[nums[[2]]];;]]],-1]/trainSize[nums[[2]]]]
+testAccSGD1=N[Count[predData[wSGD,(vec/@groupTest[nums[[1]]])],1]/testSize[nums[[1]]]]
+testAccSGD2=N[Count[predData[wSGD,(vec/@groupTest[nums[[2]]])],-1]/testSize[nums[[2]]]]
+Print[{error[w],error[wSGD]}]
 Print[{trainAcc1,trainAcc2,testAcc1,testAcc2}]
+Print[{trainAccSGD1,trainAccSGD2,testAccSGD1,testAccSGD2}]
 
 (* :!CodeAnalysis::EndBlock:: *)
