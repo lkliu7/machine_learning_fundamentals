@@ -3,13 +3,16 @@ import matplotlib.pyplot as plt
 import os
 import urllib.request
 import gzip
+import random
+import itertools
 
 # MARK: Configuration
 CONFIG = {
     'digits': [5, 8],
     'learning_rate': 1e-3,
-    'max_iterations': 1000,
-    'convergence_tolerance': 1e-6
+    'max_iterations': 100000,
+    'convergence_tolerance': 1e-6,
+    'batch_size': 64,
 }
 
 # MARK: Data Preparation
@@ -97,11 +100,12 @@ test_data = {d: np.array([img.flatten() for img in get_test_images_for_digit(d)]
 data = np.vstack([train_data[n] for n in digits])
 lr_labels = np.concat([np.ones(train_size(digits[0])),
                        -np.ones(train_size(digits[1]))])
+n = len(lr_labels)
 
 def l(x):
     return 1 / (1 + np.exp(-x))
 
-n = len(lr_labels)
+# Full gradient descent method.
 
 def error(w):
     return np.sum(l(lr_labels * (data @ w)))
@@ -113,8 +117,8 @@ def grad(w):
 lr = CONFIG['learning_rate']
 max_iterations = CONFIG['max_iterations']
 w = np.zeros(784)
-prev_loss = float('inf')
-loss_history = [(0,error(w))]
+prev_loss = error(w)
+loss_history = [(0,prev_loss)]
 tol = CONFIG['convergence_tolerance']
 
 for i in range(max_iterations):
@@ -126,23 +130,70 @@ for i in range(max_iterations):
         break
     prev_loss = current_loss
     if i % 100 == 99:
-        print(i+1, 'iterations completed')
+        print(i+1, 'iterations completed, error =', current_loss)
 
-def pred(x):
+# Stochastic gradient descent method.
+
+def batchGrad(w, vecs, labels):
+    p = l(labels * (vecs @ w))
+    return (labels * p * (1 - p)) @ vecs
+
+def batchSGD(w, batchSize, lr):
+    shuffle = random.sample(range(n), n)
+    batches = itertools.batched(shuffle, batchSize)
+    for batch in batches:
+        w -= lr * batchGrad(w, data[list(batch)], lr_labels[list(batch)])
+
+lr = CONFIG['learning_rate']
+max_iterations = CONFIG['max_iterations']
+batchSize = CONFIG['batch_size']
+w_SGD = np.zeros(784)
+prev_loss = error(w_SGD)
+loss_history_SGD = [(0, prev_loss)]
+tol = CONFIG['convergence_tolerance']
+
+for i in range(max_iterations):
+    batchSGD(w_SGD, batchSize, lr)
+    current_loss = error(w_SGD)
+    loss_history_SGD.append((i+1, current_loss))
+    if abs(prev_loss/current_loss - 1) < tol:
+        print(f'converged at iteration {i+1}')
+        break
+    prev_loss = current_loss
+    if i % 100 == 99:
+        print(i+1, 'iterations completed, error =', current_loss)
+
+# MARK: Results
+
+def pred(x, w):
     return np.sign(-w.dot(x))
 
-def pred_data(data):
+def pred_data(data, w):
     return np.sign(-data @ w)
 
 def pred_accuracy(results, label):
     return (results == label).mean()
 
-# MARK: Results
+training_error = error(w)
+training_error_SGD = error(w_SGD)
+print([training_error, training_error_SGD])
 
-train_preds_0 = pred_data(train_data[digits[0]])
-train_preds_1 = pred_data(train_data[digits[1]])
-test_preds_0 = pred_data(test_data[digits[0]])
-test_preds_1 = pred_data(test_data[digits[1]])
+train_preds_0 = pred_data(train_data[digits[0]], w_SGD)
+train_preds_1 = pred_data(train_data[digits[1]], w_SGD)
+test_preds_0 = pred_data(test_data[digits[0]], w_SGD)
+test_preds_1 = pred_data(test_data[digits[1]], w_SGD)
+
+train_preds_0_acc = pred_accuracy(train_preds_0, 1)
+train_preds_1_acc = pred_accuracy(train_preds_1, -1)
+test_preds_0_acc = pred_accuracy(test_preds_0, 1)
+test_preds_1_acc = pred_accuracy(test_preds_1, -1)
+
+print([train_preds_0_acc, train_preds_1_acc, test_preds_0_acc, test_preds_1_acc])
+
+train_preds_0 = pred_data(train_data[digits[0]], w)
+train_preds_1 = pred_data(train_data[digits[1]], w)
+test_preds_0 = pred_data(test_data[digits[0]], w)
+test_preds_1 = pred_data(test_data[digits[1]], w)
 
 train_preds_0_acc = pred_accuracy(train_preds_0, 1)
 train_preds_1_acc = pred_accuracy(train_preds_1, -1)
@@ -152,6 +203,16 @@ test_preds_1_acc = pred_accuracy(test_preds_1, -1)
 print([train_preds_0_acc, train_preds_1_acc, test_preds_0_acc, test_preds_1_acc])
 
 iters, losses = zip(*loss_history)
+
+plt.plot(iters, losses)
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
+plt.title("Loss History")
+plt.yscale('log')
+plt.grid(True)
+plt.show()
+
+iters, losses = zip(*loss_history_SGD)
 
 plt.plot(iters, losses)
 plt.xlabel("Iteration")
