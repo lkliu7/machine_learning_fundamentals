@@ -515,7 +515,7 @@ Cell[BoxData[{
  CellLabel->"In[75]:=",ExpressionUUID->"3bc24e7c-20b1-4a85-9a88-cfc7f438a0c2"]
 },
 WindowSize->{864, 1051},
-WindowMargins->{{Automatic, 0}, {Automatic, 0}},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
 FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"e3f945a5-d726-4cae-a0d1-e904bb98fda6"

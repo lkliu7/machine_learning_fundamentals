@@ -120,8 +120,8 @@ def grad(w):
 lr = CONFIG['learning_rate']
 max_iterations = CONFIG['max_iterations']
 w = np.zeros(784)
-prev_loss = float('inf')
-loss_history = [(0,error(w))]
+prev_loss = error(w)
+loss_history = [(0,prev_loss)]
 tol = CONFIG['convergence_tolerance']
 
 for i in range(max_iterations):
