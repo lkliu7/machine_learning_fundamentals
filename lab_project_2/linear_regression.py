@@ -137,7 +137,7 @@ for i in range(max_iterations):
         break
     prev_loss = current_loss
     if i % 100 == 99:
-        print(i+1, 'iterations completed')
+        print(i+1, 'iterations completed, error =', current_loss)
 
 # Stochastic gradient descent method.
 
@@ -167,15 +167,20 @@ for i in range(max_iterations):
         break
     prev_loss = current_loss
     if i % 100 == 99:
-        print(i+1, 'iterations completed')
-        
+        print(i+1, 'iterations completed, error =', current_loss)
+
+# MARK: Results
+
 def pred_data(data, w):
     return np.sign(data @ w)
 
 def pred_accuracy(results, label):
     return (results == label).mean()
 
-# MARK: Results
+training_error = error(w)
+training_error_SGD = error(w_SGD)
+training_error_exact = error(w_exact)
+print([training_error, training_error_SGD, training_error_exact])
 
 train_preds_0 = pred_data(train_data[digits[0]], w_exact)
 train_preds_1 = pred_data(train_data[digits[1]], w_exact)
