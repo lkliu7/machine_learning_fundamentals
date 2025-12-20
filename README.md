@@ -112,10 +112,6 @@ wolframscript -file lab_project_1/pca.wls
 - NumPy 2.x warnings on ARM64/Apple Silicon (benign, results unaffected)
 - Some dependencies in older RL codebases may need manual resolution
 
-### Performance
-- Mathematica parallel implementations available for computationally intensive operations
-- Python implementations prioritize clarity over optimization
-
 ## In Progress
 
 - Lab Project III: Natural Language Processing
@@ -133,4 +129,4 @@ This is educational code for learning purposes.
 
 ---
 
-**Note:** These implementations prioritize educational value and understanding over production-ready performance. For production use, consider established libraries like scikit-learn or PyTorch.
+**Note:** For production use, consider established libraries like scikit-learn or PyTorch.
