@@ -37,6 +37,24 @@ get_mnist_data()
 # Load in MNIST data.
 
 def read_idx_images(filename):
+    """Read MNIST image data from IDX file format.
+    
+    IDX format specification:
+        - Magic number (4 bytes): 2051 for image files
+        - Number of images (4 bytes)
+        - Number of rows (4 bytes): 28 for MNIST
+        - Number of columns (4 bytes): 28 for MNIST
+        - Image data: unsigned bytes in row-major order
+    
+    Args:
+        filename: Path to IDX3-ubyte file
+        
+    Returns:
+        ndarray of shape (num_images, 28, 28) with dtype uint8
+        
+    Raises:
+        ValueError: If magic number is not 2051
+    """
 
     with open(filename, 'rb') as f:
         magic = int.from_bytes(f.read(4), 'big')
@@ -99,7 +117,21 @@ def class_mean(n):
 data_mean = mean_vec(data)
 
 def covariance_matrix(images):
-    'Calculate covariance matrix of a set of images (given as 2D arrays).'
+    """Calculate sample covariance matrix for a set of images.
+    
+    Implements: Σ = (1/n) Σᵢ (xᵢ - μ)(xᵢ - μ)ᵀ
+    where μ is the mean vector and xᵢ are flattened image vectors.
+    
+    Args:
+        images: ndarray of shape (n_samples, height, width)
+        
+    Returns:
+        Covariance matrix of shape (784, 784) for 28x28 images
+        
+    Note:
+        Uses outer product for numerical stability rather than
+        computing X^T X directly after centering.
+    """
     mean = mean_vec(images)
     total = np.zeros([784,784], dtype=np.float32)
     for img in images:
@@ -131,6 +163,23 @@ def A(n):
 # known bug with np.matmul and np.matvec on Apple Silicon. Results not affected.
 
 def total_distortion_error(m):
+    """Calculate reconstruction error for PCA with m components.
+    
+    Implements: E = Σᵢ ||xᵢ - x̂ᵢ||²
+    where x̂ᵢ = μ + AᵀA(xᵢ - μ) is the reconstruction
+    and A contains the top m eigenvectors.
+    
+    Args:
+        m: Number of principal components to retain
+        
+    Returns:
+        Total squared reconstruction error across all samples
+        
+    Note:
+        Error decreases monotonically with m. The "elbow" in the
+        error curve suggests good dimensionality choices.
+        For variance-based selection, use cumulative eigenvalues instead.
+    """
     mat = A(m)
     double = np.matmul(mat.transpose(), mat)
     bias = data_mean - np.matvec(double, data_mean)
@@ -141,7 +190,27 @@ def total_distortion_error(m):
     return total
 
 def lda_matrix(dim, shift):
+    """Compute LDA projection matrix for dimensionality reduction.
     
+    Implements Fisher's Linear Discriminant Analysis:
+        W* = argmax (WᵀSᵦW) / (WᵀSᵥW)
+    
+    This is solved via generalized eigenvalue problem:
+        SᵦW = λSᵥW
+    
+    Args:
+        dim: Number of LDA dimensions to extract
+        shift: Regularization added to Sᵥ for numerical stability
+              (avoids singular matrix when d > n)
+        
+    Returns:
+        Projection matrix of shape (dim, 784)
+        
+    Note:
+        Maximum LDA dimensions = min(n_classes - 1, n_features).
+        For 3-class problem, max dimensions = 2.
+        shift is typically 1e-4; increase if matrix is near-singular.
+    """
     between_class_scatter_matrix = np.zeros([784,784], dtype=np.float32)
     for n in digits:
         card = len(get_images_for_digit(n))

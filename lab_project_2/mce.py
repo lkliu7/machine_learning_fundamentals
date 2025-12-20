@@ -8,10 +8,25 @@ import itertools
 
 # MARK: Configuration
 CONFIG = {
+# Digit pairs for binary classification
     'digits': [5, 8],
+
+    # Learning rate for gradient descent
+    # Higher values converge faster but may overshoot
+    # Typical range: 1e-6 to 1e-3 depending on loss scaling
     'learning_rate': 1e-3,
+
+    # Maximum training iterations
+    # Early stopping occurs if convergence_tolerance is met
     'max_iterations': 100000,
+
+    # Convergence criterion: |L(t-1)/L(t) - 1| < tol
+    # Stops when relative change in loss is below threshold
     'convergence_tolerance': 1e-6,
+
+    # Mini-batch size for SGD
+    # Larger batches give more stable gradients but slower updates
+    # Must divide evenly into dataset size for clean epochs
     'batch_size': 64,
 }
 
@@ -40,6 +55,24 @@ get_mnist_data()
 # Load in MNIST data.
 
 def read_idx_images(filename):
+    """Read MNIST image data from IDX file format.
+    
+    IDX format specification:
+        - Magic number (4 bytes): 2051 for image files
+        - Number of images (4 bytes)
+        - Number of rows (4 bytes): 28 for MNIST
+        - Number of columns (4 bytes): 28 for MNIST
+        - Image data: unsigned bytes in row-major order
+    
+    Args:
+        filename: Path to IDX3-ubyte file
+        
+    Returns:
+        ndarray of shape (num_images, 28, 28) with dtype uint8
+        
+    Raises:
+        ValueError: If magic number is not 2051
+    """
 
     with open(filename, 'rb') as f:
         magic = int.from_bytes(f.read(4), 'big')
@@ -135,6 +168,24 @@ for i in range(max_iterations):
 # Stochastic gradient descent method.
 
 def batchGrad(w, vecs, labels):
+    """Compute gradient for mini-batch in mean cross-entropy loss.
+
+    Implements: ∇L = Σᵢ yᵢσ(yᵢxᵢᵀw)(1 - σ(yᵢxᵢᵀw))xᵢ
+    where σ(z) = 1/(1 + exp(-z)) is the logistic sigmoid function.
+
+    Args:
+        w: Weight vector
+        vecs: Mini-batch feature matrix (batch_size, 784)
+        labels: Mini-batch labels ∈ {-1, +1}
+
+    Returns:
+        Gradient vector of shape (784,)
+
+    Note:
+        Gradient is computed for mini-batch only. For equivalent
+        behavior to full-batch GD, learning rate should be scaled
+        by (batch_size / total_samples) or regularization adjusted.
+    """
     p = l(labels * (vecs @ w))
     return (labels * p * (1 - p)) @ vecs
 
