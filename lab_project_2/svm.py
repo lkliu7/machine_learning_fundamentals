@@ -5,9 +5,10 @@ import urllib.request
 import gzip
 import random
 import itertools
-import pprint
+from joblib import Parallel, delayed
 
 # MARK: Configuration
+
 CONFIG = {
     'digits': [5, 8],
     'learning_rate': 1e-4,
@@ -169,29 +170,39 @@ lr = CONFIG['learning_rate']
 max_iterations = CONFIG['max_iterations']
 tol = CONFIG['convergence_tolerance']
 c = 0.25
-results = []
-for pair in pairs:
-    print(pair)
+
+def train_pair(pair):
+    """Train binary classifier for one pair of digits"""
     data = np.vstack([train_data[n] for n in pair])
     lr_labels = np.concat([np.ones(train_size(pair[0])),
-                       -np.ones(train_size(pair[1]))])
-    n = len(lr_labels)
+                           -np.ones(train_size(pair[1]))])
+    
     w = np.zeros(784)
     b = 0
-    prev_loss = error(w,b,c,data,lr_labels)
-    # loss_history = [(0,prev_loss)]
+    c = 0.25
+    lr = CONFIG['learning_rate']
+    max_iterations = CONFIG['max_iterations']
+    tol = CONFIG['convergence_tolerance']
+    
+    prev_loss = error(w, b, c, data, lr_labels)
+    
     for i in range(max_iterations):
-        w -= lr * gradw(w,b,c,data,lr_labels)
-        b -= lr * gradb(w,b,c,data,lr_labels)
-        current_loss = error(w,b,c,data,lr_labels)
-        # loss_history.append((i+1, current_loss))
+        w -= lr * gradw(w, b, c, data, lr_labels)
+        b -= lr * gradb(w, b, c, data, lr_labels)
+        current_loss = error(w, b, c, data, lr_labels)
+        
         if abs(prev_loss/current_loss - 1) < tol:
-            print(f'converged at iteration {i+1}')
             break
         prev_loss = current_loss
-        if i % 100 == 99:
-            print(i+1, 'iterations completed, error =', current_loss)
-    results.append((pair,w,b))
+    
+    return (pair, w, b)
+
+results = [train_pair(pair) for pair in pairs]
+
+# Parallelized version.
+
+# results = Parallel(n_jobs=-1)(delayed(train_pair)(pair) for pair in pairs)
+    
 w = {result[0]: result[1] for result in results}
 b = {result[0]: result[2] for result in results}
 
