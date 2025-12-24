@@ -1,0 +1,101 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      2892,         91]
+NotebookOptionsPosition[      2544,         77]
+NotebookOutlinePosition[      2935,         93]
+CellTagsIndexPosition[      2892,         90]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"enwik8", "=", 
+    RowBox[{"Import", "[", "\"\<Downloads/enwik8.txt\>\"", "]"}]}], ";"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", " ", 
+   RowBox[{"remove", " ", "HTML", " ", "and", " ", "XML", " ", "tags"}], " ", 
+   "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"enwik8", "=", 
+    RowBox[{"StringReplace", "[", 
+     RowBox[{"enwik8", ",", 
+      RowBox[{
+       RowBox[{"\"\<<\>\"", "~~", 
+        RowBox[{"Shortest", "[", "___", "]"}], "~~", "\"\<>\>\""}], 
+       "->", "\"\<\>\""}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", " ", 
+   RowBox[{
+   "keep", " ", "only", " ", "alphanumeric", " ", "characters", " ", "and", " ",
+     "spaces"}], " ", "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"enwik8", "=", 
+    RowBox[{"StringReplace", "[", 
+     RowBox[{"enwik8", ",", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Except", "[", 
+         RowBox[{"WordCharacter", "|", "WhitespaceCharacter"}], "]"}], ".."}],
+        "->", "\"\<\>\""}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", " ", 
+   RowBox[{"lowercase", " ", "all", " ", "text"}], " ", "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"enwik8", "=", 
+    RowBox[{"ToLowerCase", "[", "enwik8", "]"}]}], ";"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", " ", 
+   RowBox[{"list", " ", "of", " ", "words"}], " ", "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{"words", "=", 
+   RowBox[{"StringSplit", "[", "enwik8", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"wordCounts", "=", 
+   RowBox[{"Tally", "[", "words", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"mostCommonWords", "=", 
+   RowBox[{"MaximalBy", "[", 
+    RowBox[{"wordCounts", ",", "Last", ",", "10000"}], "]"}]}], 
+  ";"}]}], "Input",
+ CellChangeTimes->{{3.975550473927864*^9, 3.975550488197124*^9}, {
+   3.97555052164465*^9, 3.975550522090289*^9}, 
+   3.975551418794465*^9},ExpressionUUID->"8f669264-3c08-450f-a5fb-\
+aae646d9419f"]
+},
+WindowSize->{808, 772},
+WindowMargins->{{89, Automatic}, {Automatic, 4}},
+FrontEndVersion->"14.3 for Mac OS X x86 (64-bit) (July 8, 2025)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"cfc9626b-a424-449c-a98d-995028b8d6fd"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 1986, 55, 233, "Input",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"]
+}
+]
+*)
+
+(* End of internal cache information *)
+
