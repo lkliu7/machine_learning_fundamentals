@@ -5,6 +5,14 @@ from unidecode import unidecode
 from scipy.sparse import csr_matrix
 import numpy as np
 import csv
+import scipy.sparse.linalg
+import time
+import tracemalloc
+
+CONFIG = {
+    # Dimensions to truncate SVD.
+    'svd_dims': [20, 50, 100],
+}
 
 with open('enwik8', 'r', encoding='utf-8') as f:
     text = f.read()
@@ -55,3 +63,18 @@ for line in text.split('\n'):
     row += 1
 
 document_word_frequency_matrix = csr_matrix((values, (row_indices, col_indices)), shape=(row, len(most_common_words)))
+u = {}
+S = {}
+v = {}
+svd_dims = CONFIG['svd_dims']
+for dim in svd_dims:
+    tracemalloc.start()
+    start_time = time.perf_counter()
+    u1, S1, v1 = scipy.sparse.linalg.svds(document_word_frequency_matrix, dim)
+    time_taken = time.perf_counter() - start_time
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    u[dim] = u1
+    S[dim] = S1
+    v[dim] = v1
+    print(f'SVD for dimension {dim} finished in {time_taken:.3f} seconds, using {peak} bytes of memory')
