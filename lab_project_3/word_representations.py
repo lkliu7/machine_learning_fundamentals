@@ -19,6 +19,7 @@ with open('enwik8', 'r', encoding='utf-8') as f:
 
 text = re.sub(r'<[^>]+>', '', text)
 text = re.sub(r'&[^;]+;', '', text)
+text = re.sub(r'#[^;]+;', '', text)
 text = re.sub(r'http[^\s]+', '', text)
 
 text = unidecode(text)

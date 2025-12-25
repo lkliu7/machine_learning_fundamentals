@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[     10340,        259]
-NotebookOptionsPosition[      9802,        243]
-NotebookOutlinePosition[     10192,        259]
-CellTagsIndexPosition[     10149,        256]
+NotebookDataLength[     10550,        265]
+NotebookOptionsPosition[     10012,        249]
+NotebookOutlinePosition[     10402,        265]
+CellTagsIndexPosition[     10359,        262]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -24,10 +24,10 @@ Cell[BoxData[{
    RowBox[{"enwik8", "=", 
     RowBox[{"Import", "[", 
      RowBox[{"\"\<Downloads/enwik8\>\"", ",", "\"\<Text\>\""}], "]"}]}], 
-   ";"}], "\n", 
+   ";"}], "\[IndentingNewLine]", 
   RowBox[{"(*", " ", 
    RowBox[{"remove", " ", "HTML", " ", "and", " ", "XML", " ", "tags"}], " ", 
-   "*)"}]}], "\[IndentingNewLine]", 
+   "*)"}]}], "\n", 
  RowBox[{
   RowBox[{"enwik8", "=", 
    RowBox[{"StringReplace", "[", 
@@ -40,6 +40,10 @@ Cell[BoxData[{
         "->", "\"\< \>\""}], ",", 
        RowBox[{
         RowBox[{"\"\<&\>\"", "~~", 
+         RowBox[{"Shortest", "[", "___", "]"}], "~~", "\"\<;\>\""}], 
+        "->", "\"\< \>\""}], ",", 
+       RowBox[{
+        RowBox[{"\"\<#\>\"", "~~", 
          RowBox[{"Shortest", "[", "___", "]"}], "~~", "\"\<;\>\""}], 
         "->", "\"\< \>\""}], ",", 
        RowBox[{
@@ -70,9 +74,10 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"enwik8", "=", 
-    RowBox[{"ToLowerCase", "[", "enwik8", "]"}]}], ";"}], "\n", 
+    RowBox[{"ToLowerCase", "[", "enwik8", "]"}]}], ";"}], 
+  "\[IndentingNewLine]", 
   RowBox[{"(*", " ", 
-   RowBox[{"list", " ", "of", " ", "words"}], " ", "*)"}]}], "\[IndentingNewLine]", 
+   RowBox[{"list", " ", "of", " ", "words"}], " ", "*)"}]}], "\n", 
  RowBox[{
   RowBox[{"words", "=", 
    RowBox[{"StringSplit", "[", "enwik8", "]"}]}], ";"}], "\[IndentingNewLine]", 
@@ -117,7 +122,8 @@ Cell[BoxData[{
    3.9756262106264277`*^9, 3.975626239798129*^9}, 3.975626273729273*^9, {
    3.975626330315175*^9, 3.97562633857683*^9}, 3.9756279484791718`*^9, {
    3.975628284185932*^9, 3.975628288865267*^9}, 3.9756286415786858`*^9, {
-   3.9756306454420156`*^9, 3.975630648730989*^9}},
+   3.9756306454420156`*^9, 3.975630648730989*^9}, {3.975682199370062*^9, 
+   3.975682203433428*^9}},
  CellLabel->"In[1]:=",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
 
 Cell[BoxData[{
@@ -243,7 +249,7 @@ Cell[BoxData[
 },
 WindowSize->{720, 872},
 WindowMargins->{{Automatic, 0}, {Automatic, 0}},
-FrontEndVersion->"14.3 for Mac OS X x86 (64-bit) (July 8, 2025)",
+FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"cfc9626b-a424-449c-a98d-995028b8d6fd"
 ]
@@ -258,9 +264,9 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[554, 20, 4049, 100, 458, "Input",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
-Cell[4606, 122, 4435, 98, 397, "Input",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"],
-Cell[9044, 222, 754, 19, 90, "Input",ExpressionUUID->"a8ba9b95-60b3-46d0-b0d1-b7de8fb4061e"]
+Cell[554, 20, 4259, 106, 458, "Input",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
+Cell[4816, 128, 4435, 98, 397, "Input",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"],
+Cell[9254, 228, 754, 19, 90, "Input",ExpressionUUID->"a8ba9b95-60b3-46d0-b0d1-b7de8fb4061e"]
 }
 ]
 *)
