@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      7579,        200]
-NotebookOptionsPosition[      7134,        185]
-NotebookOutlinePosition[      7526,        201]
-CellTagsIndexPosition[      7483,        198]
+NotebookDataLength[      9468,        237]
+NotebookOptionsPosition[      9022,        222]
+NotebookOutlinePosition[      9414,        238]
+CellTagsIndexPosition[      9371,        235]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -21,7 +21,7 @@ Notebook[{
 Cell[BoxData[{
  RowBox[{
   RowBox[{
-   RowBox[{"rawText", "=", 
+   RowBox[{"enwik8", "=", 
     RowBox[{"Import", "[", 
      RowBox[{"\"\<Downloads/enwik8\>\"", ",", "\"\<Text\>\""}], "]"}]}], 
    ";"}], "\[IndentingNewLine]", 
@@ -31,7 +31,7 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{"enwik8", "=", 
    RowBox[{"StringReplace", "[", 
-    RowBox[{"rawText", ",", 
+    RowBox[{"enwik8", ",", 
      RowBox[{"{", 
       RowBox[{
        RowBox[{
@@ -88,6 +88,21 @@ Cell[BoxData[{
   RowBox[{"mostCommonWords", "=", 
    RowBox[{"Keys", "[", "mostCommonWordsCounts", "]"}]}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
+  RowBox[{"wordSim", "=", 
+   RowBox[{"ToLowerCase", "[", 
+    RowBox[{"DeleteDuplicates", "[", 
+     RowBox[{"Flatten", "[", 
+      RowBox[{"Most", "/@", 
+       RowBox[{"Rest", "[", 
+        RowBox[{"Import", "[", "\"\<Downloads/wordsim353crowd.csv\>\"", "]"}],
+         "]"}]}], "]"}], "]"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"mostCommonWords", "=", 
+   RowBox[{"Join", "[", 
+    RowBox[{"mostCommonWords", ",", 
+     RowBox[{"Complement", "[", 
+      RowBox[{"wordSim", ",", "mostCommonWords"}], "]"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
   RowBox[{"wordIndex", "=", 
    RowBox[{"AssociationThread", "[", 
     RowBox[{"mostCommonWords", ",", 
@@ -99,8 +114,12 @@ Cell[BoxData[{
    3.97561646264939*^9, 3.97561652694037*^9}, {3.975617326257259*^9, 
    3.975617327693283*^9}, {3.9756174936310863`*^9, 3.975617502691616*^9}, {
    3.975622164933201*^9, 3.975622175414694*^9}, {3.97562235900661*^9, 
-   3.975622359304734*^9}, {3.975623253169256*^9, 3.975623261247229*^9}},
- CellLabel->"In[1]:=",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
+   3.975622359304734*^9}, {3.975623253169256*^9, 3.975623261247229*^9}, {
+   3.9756262106264277`*^9, 3.975626239798129*^9}, 3.975626273729273*^9, {
+   3.975626330315175*^9, 3.97562633857683*^9}, 3.9756279484791718`*^9, {
+   3.975628284185932*^9, 3.975628288865267*^9}, 3.9756286415786858`*^9, {
+   3.9756306454420156`*^9, 3.975630648730989*^9}},
+ CellLabel->"In[28]:=",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
 
 Cell[BoxData[{
  RowBox[{
@@ -111,61 +130,74 @@ Cell[BoxData[{
    RowBox[{"Length", "[", "mostCommonWords", "]"}]}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"row", "=", "1"}], ";"}], "\[IndentingNewLine]", 
- RowBox[{"MaxMemoryUsed", "[", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{"rowInds", ",", "colInds", ",", "vals"}], "}"}], "=", 
+ RowBox[{"AbsoluteTiming", "[", 
+  RowBox[{"Monitor", "[", 
    RowBox[{
-    RowBox[{"Reap", "[", 
+    RowBox[{
      RowBox[{
-      RowBox[{"While", "[", 
-       RowBox[{
-        RowBox[{"StringQ", "[", 
-         RowBox[{"line", "=", 
-          RowBox[{"ReadLine", "[", "stream", "]"}]}], "]"}], ",", 
-        RowBox[{
-         RowBox[{"w", "=", 
-          RowBox[{"StringSplit", "[", "line", "]"}]}], ";", 
-         "\[IndentingNewLine]", 
-         RowBox[{"If", "[", 
-          RowBox[{
-           RowBox[{
-            RowBox[{"Length", "[", "w", "]"}], "<", "3"}], ",", 
-           RowBox[{"Continue", "[", "]"}]}], "]"}], ";", 
-         "\[IndentingNewLine]", 
-         RowBox[{"ids", "=", 
-          RowBox[{"Lookup", "[", 
-           RowBox[{"wordIndex", ",", "w", ",", "Nothing"}], "]"}]}], ";", 
-         "\[IndentingNewLine]", 
-         RowBox[{"cnts", "=", 
-          RowBox[{"Counts", "[", "ids", "]"}]}], ";", "\[IndentingNewLine]", 
-         RowBox[{"cols", "=", 
-          RowBox[{"Keys", "[", "cnts", "]"}]}], ";", "\[IndentingNewLine]", 
-         RowBox[{"cts", "=", 
-          RowBox[{"Values", "[", "cnts", "]"}]}], ";", "\[IndentingNewLine]", 
-         
-         RowBox[{"Sow", "[", 
-          RowBox[{
-           RowBox[{"ConstantArray", "[", 
-            RowBox[{"row", ",", 
-             RowBox[{"Length", "[", "cols", "]"}]}], "]"}], 
-           ",", "\"\<r\>\""}], "]"}], ";", "\[IndentingNewLine]", 
-         RowBox[{"Sow", "[", 
-          RowBox[{"cols", ",", "\"\<c\>\""}], "]"}], ";", 
-         "\[IndentingNewLine]", 
-         RowBox[{"Sow", "[", 
-          RowBox[{"cts", ",", "\"\<v\>\""}], "]"}], ";", 
-         "\[IndentingNewLine]", 
-         RowBox[{"row", "++"}]}]}], "]"}], ",", "_", ",", 
+      RowBox[{"{", 
+       RowBox[{"rowInds", ",", "colInds", ",", "vals"}], "}"}], "=", 
       RowBox[{
-       RowBox[{"Developer`ToPackedArray", "[", 
-        RowBox[{"Flatten", "[", "#2", "]"}], "]"}], "&"}]}], "]"}], "[", 
-    RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "\[IndentingNewLine]", 
+       RowBox[{"Reap", "[", 
+        RowBox[{
+         RowBox[{"While", "[", 
+          RowBox[{
+           RowBox[{"StringQ", "[", 
+            RowBox[{"line", "=", 
+             RowBox[{"ReadLine", "[", "stream", "]"}]}], "]"}], ",", 
+           RowBox[{
+            RowBox[{"w", "=", 
+             RowBox[{"StringSplit", "[", "line", "]"}]}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Length", "[", "w", "]"}], "<", "3"}], ",", 
+              RowBox[{"Continue", "[", "]"}]}], "]"}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"ids", "=", 
+             RowBox[{"Lookup", "[", 
+              RowBox[{"wordIndex", ",", "w", ",", "Nothing"}], "]"}]}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"cnts", "=", 
+             RowBox[{"Tally", "[", "ids", "]"}]}], ";", "\[IndentingNewLine]", 
+            RowBox[{"cols", "=", 
+             RowBox[{"cnts", "[", 
+              RowBox[{"[", 
+               RowBox[{"All", ",", "1"}], "]"}], "]"}]}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"cts", "=", 
+             RowBox[{"cnts", "[", 
+              RowBox[{"[", 
+               RowBox[{"All", ",", "2"}], "]"}], "]"}]}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"Sow", "[", 
+             RowBox[{
+              RowBox[{"ConstantArray", "[", 
+               RowBox[{"row", ",", 
+                RowBox[{"Length", "[", "cols", "]"}]}], "]"}], 
+              ",", "\"\<r\>\""}], "]"}], ";", "\[IndentingNewLine]", 
+            RowBox[{"Sow", "[", 
+             RowBox[{"cols", ",", "\"\<c\>\""}], "]"}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"Sow", "[", 
+             RowBox[{"cts", ",", "\"\<v\>\""}], "]"}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"row", "++"}]}]}], "]"}], ",", "_", ",", 
+         RowBox[{
+          RowBox[{"Developer`ToPackedArray", "[", 
+           RowBox[{"Flatten", "[", "#2", "]"}], "]"}], "&"}]}], "]"}], "[", 
+       RowBox[{"[", "2", "]"}], "]"}]}], ";"}], ",", "row"}], "]"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Close", "[", "stream", "]"}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"documentWordFrequencyMatrix", "=", 
    RowBox[{"SparseArray", "[", 
     RowBox[{
-     RowBox[{"coords", "->", "vals"}], ",", 
+     RowBox[{
+      RowBox[{"Transpose", "[", 
+       RowBox[{"{", 
+        RowBox[{"rowInds", ",", "colInds"}], "}"}], "]"}], "->", "vals"}], ",", 
      RowBox[{"{", 
       RowBox[{
        RowBox[{"row", "-", "1"}], ",", "nCols"}], "}"}]}], "]"}]}], 
@@ -179,9 +211,14 @@ Cell[BoxData[{
    3.975623352078518*^9}, {3.975623416554646*^9, 3.975623524550756*^9}, {
    3.975623559821661*^9, 3.975623560828168*^9}, 3.975623679526009*^9, {
    3.9756256795607643`*^9, 3.975625706136592*^9}, {3.975625737520687*^9, 
-   3.975625740437512*^9}, {3.9756257845903788`*^9, 
-   3.975625785068161*^9}},ExpressionUUID->"eb28127b-def8-4679-b6f8-\
-8dcd9f4c8c62"]
+   3.975625740437512*^9}, {3.9756257845903788`*^9, 3.975625785068161*^9}, {
+   3.975626347302702*^9, 3.975626350949389*^9}, {3.975626415461588*^9, 
+   3.9756264235597754`*^9}, {3.975626623410928*^9, 3.9756266681144037`*^9}, {
+   3.975626707924985*^9, 3.9756267531245203`*^9}, {3.975627042191821*^9, 
+   3.975627042909544*^9}, {3.975627801569022*^9, 3.975627839453269*^9}, {
+   3.975629020435258*^9, 3.9756290376848917`*^9}, {3.975629106767434*^9, 
+   3.975629108307221*^9}, {3.975630296398089*^9, 3.9756302968029633`*^9}},
+ CellLabel->"In[40]:=",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"]
 },
 WindowSize->{1728, 1051},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
@@ -200,8 +237,8 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[554, 20, 3195, 82, 294, "Input",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
-Cell[3752, 104, 3378, 79, 294, "Input",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"]
+Cell[554, 20, 4053, 101, 335, "Input",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
+Cell[4610, 123, 4408, 97, 315, "Input",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"]
 }
 ]
 *)
