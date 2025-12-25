@@ -225,3 +225,8 @@ archive/t10k-labels.idx1-ubyte
 archive/train-images.idx3-ubyte
 archive/train-labels.idx1-ubyte
 lab_project_2/scratch_linear_regression.nb
+enwik8
+enwik8.zip
+enwik9
+enwik9.zip
+wordsim353crowd.csv
