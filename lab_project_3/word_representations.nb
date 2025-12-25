@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      9468,        237]
-NotebookOptionsPosition[      9022,        222]
-NotebookOutlinePosition[      9414,        238]
-CellTagsIndexPosition[      9371,        235]
+NotebookDataLength[     10340,        259]
+NotebookOptionsPosition[      9802,        243]
+NotebookOutlinePosition[     10192,        259]
+CellTagsIndexPosition[     10149,        256]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -24,10 +24,10 @@ Cell[BoxData[{
    RowBox[{"enwik8", "=", 
     RowBox[{"Import", "[", 
      RowBox[{"\"\<Downloads/enwik8\>\"", ",", "\"\<Text\>\""}], "]"}]}], 
-   ";"}], "\[IndentingNewLine]", 
+   ";"}], "\n", 
   RowBox[{"(*", " ", 
    RowBox[{"remove", " ", "HTML", " ", "and", " ", "XML", " ", "tags"}], " ", 
-   "*)"}]}], "\n", 
+   "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"enwik8", "=", 
    RowBox[{"StringReplace", "[", 
@@ -70,10 +70,9 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"enwik8", "=", 
-    RowBox[{"ToLowerCase", "[", "enwik8", "]"}]}], ";"}], 
-  "\[IndentingNewLine]", 
+    RowBox[{"ToLowerCase", "[", "enwik8", "]"}]}], ";"}], "\n", 
   RowBox[{"(*", " ", 
-   RowBox[{"list", " ", "of", " ", "words"}], " ", "*)"}]}], "\n", 
+   RowBox[{"list", " ", "of", " ", "words"}], " ", "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"words", "=", 
    RowBox[{"StringSplit", "[", "enwik8", "]"}]}], ";"}], "\[IndentingNewLine]", 
@@ -119,7 +118,7 @@ Cell[BoxData[{
    3.975626330315175*^9, 3.97562633857683*^9}, 3.9756279484791718`*^9, {
    3.975628284185932*^9, 3.975628288865267*^9}, 3.9756286415786858`*^9, {
    3.9756306454420156`*^9, 3.975630648730989*^9}},
- CellLabel->"In[28]:=",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
+ CellLabel->"In[1]:=",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
 
 Cell[BoxData[{
  RowBox[{
@@ -152,7 +151,7 @@ Cell[BoxData[{
             RowBox[{"If", "[", 
              RowBox[{
               RowBox[{
-               RowBox[{"Length", "[", "w", "]"}], "<", "3"}], ",", 
+               RowBox[{"Length", "[", "w", "]"}], "<=", "3"}], ",", 
               RowBox[{"Continue", "[", "]"}]}], "]"}], ";", 
             "\[IndentingNewLine]", 
             RowBox[{"ids", "=", 
@@ -217,12 +216,34 @@ Cell[BoxData[{
    3.975626707924985*^9, 3.9756267531245203`*^9}, {3.975627042191821*^9, 
    3.975627042909544*^9}, {3.975627801569022*^9, 3.975627839453269*^9}, {
    3.975629020435258*^9, 3.9756290376848917`*^9}, {3.975629106767434*^9, 
-   3.975629108307221*^9}, {3.975630296398089*^9, 3.9756302968029633`*^9}},
- CellLabel->"In[40]:=",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"]
+   3.975629108307221*^9}, {3.975630296398089*^9, 3.9756302968029633`*^9}, 
+   3.975669356532035*^9},
+ CellLabel->"In[13]:=",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"AbsoluteTiming", "[", 
+    RowBox[{"MaxMemoryUsed", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"u", "[", "#", "]"}], ",", 
+        RowBox[{"S", "[", "#", "]"}], ",", 
+        RowBox[{"v", "[", "#", "]"}]}], "}"}], "=", 
+      RowBox[{"SingularValueDecomposition", "[", 
+       RowBox[{
+        RowBox[{"N", "[", "documentWordFrequencyMatrix", "]"}], ",", "#"}], 
+       "]"}]}], "]"}], "]"}], "&"}], "/@", 
+  RowBox[{"{", 
+   RowBox[{"20", ",", "50", ",", "100"}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.97567241408259*^9, 3.975672468311034*^9}, {
+  3.975672764101708*^9, 3.9756727656342487`*^9}},
+ CellLabel->"In[19]:=",ExpressionUUID->"a8ba9b95-60b3-46d0-b0d1-b7de8fb4061e"]
 },
-WindowSize->{1728, 1051},
-WindowMargins->{{0, Automatic}, {Automatic, 0}},
-FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
+WindowSize->{720, 872},
+WindowMargins->{{Automatic, 0}, {Automatic, 0}},
+FrontEndVersion->"14.3 for Mac OS X x86 (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"cfc9626b-a424-449c-a98d-995028b8d6fd"
 ]
@@ -237,8 +258,9 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[554, 20, 4053, 101, 335, "Input",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
-Cell[4610, 123, 4408, 97, 315, "Input",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"]
+Cell[554, 20, 4049, 100, 458, "Input",ExpressionUUID->"8f669264-3c08-450f-a5fb-aae646d9419f"],
+Cell[4606, 122, 4435, 98, 397, "Input",ExpressionUUID->"eb28127b-def8-4679-b6f8-8dcd9f4c8c62"],
+Cell[9044, 222, 754, 19, 90, "Input",ExpressionUUID->"a8ba9b95-60b3-46d0-b0d1-b7de8fb4061e"]
 }
 ]
 *)
