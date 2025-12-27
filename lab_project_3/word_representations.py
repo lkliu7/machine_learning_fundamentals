@@ -15,6 +15,12 @@ CONFIG = {
     
     # Alternating algorithm iterations.
     'iters': 10,
+
+    # Learning rate for SGD.
+    'learning_rate': 1e-2,
+
+    # SGD steps.
+    'SGD_iters': 10 ** 7,
 }
 
 with open('enwik8', 'r', encoding='utf-8') as f:
@@ -112,7 +118,46 @@ for dim in svd_dims:
     V_alt[dim] = V
     print(f'Alternating algorithm for dimension {dim} finished in {time_taken:.3f} seconds, using {peak} bytes of memory')
 
+def matrix_factorization_SGD(mat, k, l1, l2, lr, steps):
+    n, m = mat.shape
+    V = np.random.random((m, k))
+    U = np.random.random((n, k))
+    for _ in range(steps):
+        i, j = np.random.randint((n, m))
+        u = U[i]
+        v = V[j]
+        t = -2 * (mat[i,j] - u.dot(v))
+        du = t * v + 2 * l1 * u
+        dv = t * u + 2 * l2 * v
+        u -= lr * du
+        v -= lr * dv
+        U[i] = u
+        V[j] = v
+    return U, V
+
+U_SGD = {}
+V_SGD = {}
+steps = CONFIG['SGD_iters']
+lr = CONFIG['learning_rate']
+for dim in svd_dims:
+    tracemalloc.start()
+    start_time = time.perf_counter()
+    U, V = matrix_factorization_SGD(document_word_frequency_matrix, dim, 1, 1, lr, steps)
+    time_taken = time.perf_counter() - start_time
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    U_SGD[dim] = U
+    V_SGD[dim] = V
+    print(f'SGD matrix factorization for dimension {dim} finished in {time_taken:.3f} seconds, using {peak} bytes of memory')
+
+'''
+N.B.: The following reconstruction error computation is highly memory-intensive.
+Uncomment it if you are sure you want to run it.
+'''
+
+'''
 error_alt = {}
+error_SGD = {}
 error_SVD = {}
 # Efficient Frobenius norm computation
 def sparse_reconstruction_error(sparse_mat, U, S, V):
@@ -134,5 +179,7 @@ def sparse_reconstruction_error(sparse_mat, U, S, V):
 for dim in svd_dims:
     error_SVD[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_SVD[dim], S_SVD[dim], V_SVD[dim])
     error_alt[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_alt[dim], np.ones(dim), V_alt[dim].T)
-    print(f'SVD error: {error_SVD[dim]}, alternating algorithm error: {error_alt[dim]}')
+    error_SGD[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_SGD[dim], np.ones(dim), V_SGD[dim].T)
+    print(f'SVD error: {error_SVD[dim]}, alternating algorithm error: {error_alt[dim]}, SGD algorithm error: {error_SGD[dim]}')
 
+'''
