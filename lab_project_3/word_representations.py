@@ -87,7 +87,7 @@ for dim in svd_dims:
     tracemalloc.stop()
     U_SVD[dim] = u
     S_SVD[dim] = S
-    V_SVD[dim] = v
+    V_SVD[dim] = v.T
     print(f'SVD for dimension {dim} finished in {time_taken:.3f} seconds, using {peak} bytes of memory')
 
 def matrix_factorization(mat, k, l1, l2, steps):
@@ -164,7 +164,7 @@ error_SVD = {}
 def sparse_reconstruction_error(sparse_mat, U, S, V):
     """Compute ||sparse_mat - USV||_F without materializing dense difference"""
     # Reconstruction
-    reconstructed = U @ np.diag(S) @ V
+    reconstructed = U @ np.diag(S) @ V.T
     
     # ||A||_F^2 for sparse matrix
     norm_A_sq = sparse_mat.data @ sparse_mat.data
@@ -179,8 +179,8 @@ def sparse_reconstruction_error(sparse_mat, U, S, V):
 
 for dim in svd_dims:
     error_SVD[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_SVD[dim], S_SVD[dim], V_SVD[dim])
-    error_alt[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_alt[dim], np.ones(dim), V_alt[dim].T)
-    error_SGD[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_SGD[dim], np.ones(dim), V_SGD[dim].T)
+    error_alt[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_alt[dim], np.ones(dim), V_alt[dim])
+    error_SGD[dim] = sparse_reconstruction_error(document_word_frequency_matrix, U_SGD[dim], np.ones(dim), V_SGD[dim])
     print(f'SVD error: {error_SVD[dim]}, alternating algorithm error: {error_alt[dim]}, SGD algorithm error: {error_SGD[dim]}')
 
 '''
@@ -188,18 +188,61 @@ for dim in svd_dims:
 def cosine_similarity(u, v):
     return u @ v / (np.linalg.norm(u) * np.linalg.norm(v))
 
-V = V_SVD[20]
-cosine_vs_human = [
-    (cosine_similarity(V[:, word_index[w1]], V[:, word_index[w2]]), score)
-    for w1, w2, score in wordsim_pairs
-]
+cosine_vs_human = {}
+corr = {}
+methods = {
+    "alt": V_alt,
+    "sgd": V_SGD,
+    "svd": V_SVD,
+}
 
-cosine_vals, human_scores = zip(*cosine_vs_human)
-r, p = scipy.stats.pearsonr(cosine_vals, human_scores)
+for method_name, V_dict in methods.items():
+    cosine_vs_human[method_name] = {}
+    corr[method_name] = {}
 
-plt.figure()
-plt.scatter(cosine_vals, human_scores, alpha=0.5)
-plt.xlabel("Cosine similarity")
-plt.ylabel("Human similarity score")
-plt.title(f"WordSim353 (r = {r:.3f})")
+    for dim in svd_dims:
+        V = V_dict[dim]
+
+        pairs = [
+            (
+                cosine_similarity(
+                    V[word_index[w1]],
+                    V[word_index[w2]]
+                ),
+                score
+            )
+            for w1, w2, score in wordsim_pairs
+            if w1 in word_index and w2 in word_index
+        ]
+
+        cosine_vals, human_scores = zip(*pairs)
+        r, _ = scipy.stats.pearsonr(cosine_vals, human_scores)
+
+        cosine_vs_human[method_name][dim] = pairs
+        corr[method_name][dim] = r
+
+fig, axes = plt.subplots(
+    nrows=len(methods),
+    ncols=len(svd_dims),
+    figsize=(4 * len(svd_dims), 4 * len(methods)),
+    sharex=True,
+    sharey=True
+)
+
+for row, method in enumerate(methods):
+    for col, dim in enumerate(svd_dims):
+        ax = axes[row, col]
+
+        cosine_vals, human_scores = zip(*cosine_vs_human[method][dim])
+        r = corr[method][dim]
+
+        ax.scatter(cosine_vals, human_scores, alpha=0.4)
+        ax.set_title(f"{method}, k={dim}\nr={r:.3f}")
+
+        if row == len(methods) - 1:
+            ax.set_xlabel("Cosine similarity")
+        if col == 0:
+            ax.set_ylabel("Human score")
+
+plt.tight_layout()
 plt.show()
