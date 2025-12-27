@@ -9,6 +9,7 @@ import time
 import tracemalloc
 import matplotlib.pyplot as plt
 import scipy.stats
+from sklearn.manifold import TSNE
 
 
 CONFIG = {
@@ -22,7 +23,7 @@ CONFIG = {
     'learning_rate': 1e-2,
 
     # SGD steps.
-    'SGD_iters': 10 ** 6,
+    'SGD_iters': 10 ** 5,
 }
 
 with open('enwik8', 'r', encoding='utf-8') as f:
@@ -246,3 +247,22 @@ for row, method in enumerate(methods):
 
 plt.tight_layout()
 plt.show()
+
+# Get top 300 most frequent words
+top_300_indices = [word_index[w] for w in most_common_words[:300]]
+
+for dim in svd_dims:
+    V = V_SVD[dim]  # or V_alt, V_SGD
+    vectors_300 = V[top_300_indices]
+    
+    # Reduce to 2D
+    tsne = TSNE(n_components=2, random_state=42)
+    coords = tsne.fit_transform(vectors_300)
+    
+    # Plot with labels
+    plt.figure(figsize=(20, 20))
+    plt.scatter(coords[:, 0], coords[:, 1], alpha=0.3)
+    for i, word in enumerate(most_common_words[:300]):
+        plt.annotate(word, coords[i], fontsize=8)
+    plt.title(f"t-SNE visualization, k={dim}")
+    plt.show()
