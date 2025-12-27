@@ -7,6 +7,8 @@ import csv
 import scipy.sparse.linalg
 import time
 import tracemalloc
+import matplotlib.pyplot as plt
+import scipy.stats
 
 
 CONFIG = {
@@ -20,7 +22,7 @@ CONFIG = {
     'learning_rate': 1e-2,
 
     # SGD steps.
-    'SGD_iters': 10 ** 7,
+    'SGD_iters': 10 ** 6,
 }
 
 with open('enwik8', 'r', encoding='utf-8') as f:
@@ -43,10 +45,9 @@ most_common_words = [t[0] for t in most_common_words_counts]
 with open('wordsim353crowd.csv', 'r') as f:
     reader = csv.reader(f)
     next(reader)
-    wordsim_words = set()
-    for row in reader:
-        wordsim_words.add(row[0].lower())
-        wordsim_words.add(row[1].lower())
+    wordsim_pairs = [(w1.lower(), w2.lower(), float(score)) for w1, w2, score in reader]
+
+wordsim_words = {w for pair in wordsim_pairs for w in pair[:2]}
 
 most_common_set = set(most_common_words)
 new_words = wordsim_words - most_common_set
@@ -183,3 +184,22 @@ for dim in svd_dims:
     print(f'SVD error: {error_SVD[dim]}, alternating algorithm error: {error_alt[dim]}, SGD algorithm error: {error_SGD[dim]}')
 
 '''
+
+def cosine_similarity(u, v):
+    return u @ v / (np.linalg.norm(u) * np.linalg.norm(v))
+
+V = V_SVD[20]
+cosine_vs_human = [
+    (cosine_similarity(V[:, word_index[w1]], V[:, word_index[w2]]), score)
+    for w1, w2, score in wordsim_pairs
+]
+
+cosine_vals, human_scores = zip(*cosine_vs_human)
+r, p = scipy.stats.pearsonr(cosine_vals, human_scores)
+
+plt.figure()
+plt.scatter(cosine_vals, human_scores, alpha=0.5)
+plt.xlabel("Cosine similarity")
+plt.ylabel("Human similarity score")
+plt.title(f"WordSim353 (r = {r:.3f})")
+plt.show()
