@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import os
 import urllib.request
 import gzip
+import random
+import itertools
 
 # MARK: Configuration
 CONFIG = {
@@ -10,6 +12,7 @@ CONFIG = {
    'learning_rate': 1e-1,
    'hidden_dims': [256, 256],
    'update_frequency': 1,
+   'batch_size': 128,
 }
 
 # MARK: Data Preparation
@@ -97,6 +100,7 @@ epochs = CONFIG['epochs']
 lr = CONFIG['learning_rate']
 hidden_dims = CONFIG['hidden_dims']
 update_frequency = CONFIG['update_frequency']
+batch_size = CONFIG['batch_size']
 
 n_train, d0 = train_data.shape
 n_test, _ = test_data.shape
@@ -149,30 +153,46 @@ for m in range(1,epochs+1):
     e = {}
     gradQW = {}
     gradQb = {}
-    batch = train_data
-    n_batch, _ = train_data.shape
-    Z[0] = batch.T
-    for j in range(1, L+1):
-        A[j] = W[j] @ Z[j-1] + b[j][:, np.newaxis]
-        Z[j] = np.maximum(A[j], 0)
-    A[L+1] = W[L+1] @ Z[L] + b[L+1][:, np.newaxis]
-    Y = np.exp(A[L+1].T)
-    Y = np.array([row / np.sum(row) for row in Y])
-    label_mat = np.zeros((n_batch, n_classes))
-    label_indices = [class_int_label[label] for label in train_labels]
-    label_mat[np.arange(n_batch), label_indices] = 1
-    e[L+1] = Y - label_mat
-    for j in range(L,0,-1):
-        e[j] = (e[j+1] @ W[j+1]) * np.heaviside(Z[j], 0).T
-    for j in range(1, L+2):
-        gradQW[j] = (Z[j-1] @ e[j]).T
-        gradQb[j] = np.sum(e[j], axis=0)
-    loss_history.append((m-1, -np.sum(np.log(Y) * label_mat)))
-    print(loss_history[-1])
-    for j in range(1, L+2):
-        W[j] -= lr * gradQW[j] / n_batch
-        b[j] -= lr * gradQb[j] / n_batch
+    shuffle = random.sample(range(n_train), n_train)
+    batches = itertools.batched(shuffle, batch_size)
+    for batch in batches:
+        batch_data = train_data[list(batch)]
+        batch_labels = [train_labels[i] for i in batch]
+        n_batch, _ = batch_data.shape
+        Z[0] = batch_data.T
+        for j in range(1, L+1):
+            A[j] = W[j] @ Z[j-1] + b[j][:, np.newaxis]
+            Z[j] = np.maximum(A[j], 0)
+        A[L+1] = W[L+1] @ Z[L] + b[L+1][:, np.newaxis]
+        Y = np.exp(A[L+1].T)
+        Y = np.array([row / np.sum(row) for row in Y])
+        label_mat = np.zeros((n_batch, n_classes))
+        label_indices = [class_int_label[label] for label in batch_labels]
+        label_mat[np.arange(n_batch), label_indices] = 1
+        e[L+1] = Y - label_mat
+        for j in range(L,0,-1):
+            e[j] = (e[j+1] @ W[j+1]) * np.heaviside(Z[j], 0).T
+        for j in range(1, L+2):
+            gradQW[j] = (Z[j-1] @ e[j]).T
+            gradQb[j] = np.sum(e[j], axis=0)
+        for j in range(1, L+2):
+            W[j] -= lr * gradQW[j] / n_batch
+            b[j] -= lr * gradQb[j] / n_batch
     if m % update_frequency == 0:
+        batch = train_data
+        n_batch, _ = train_data.shape
+        Z[0] = batch.T
+        for j in range(1, L+1):
+            A[j] = W[j] @ Z[j-1] + b[j][:, np.newaxis]
+            Z[j] = np.maximum(A[j], 0)
+        A[L+1] = W[L+1] @ Z[L] + b[L+1][:, np.newaxis]
+        Y = np.exp(A[L+1].T)
+        Y = np.array([row / np.sum(row) for row in Y])
+        label_mat = np.zeros((n_batch, n_classes))
+        label_indices = [class_int_label[label] for label in train_labels]
+        label_mat[np.arange(n_batch), label_indices] = 1
+        loss_history.append((m-1, -np.sum(np.log(Y) * label_mat)))
+        print(loss_history[-1])
         train_preds = batch_pred(train_data)
         matches = (train_preds == train_labels)
         acc.append((m, np.sum(matches) / n_train))
