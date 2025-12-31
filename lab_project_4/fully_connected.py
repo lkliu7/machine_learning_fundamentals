@@ -6,7 +6,7 @@ import gzip
 
 # MARK: Configuration
 CONFIG = {
-   'epochs': 1000,
+   'epochs': 100,
    'learning_rate': 1e-1,
    'hidden_dims': [256, 256],
    'update_frequency': 1,
@@ -100,19 +100,14 @@ update_frequency = CONFIG['update_frequency']
 
 n_train, d0 = train_data.shape
 n_test, _ = test_data.shape
-scale = np.sqrt(2.0 / d0)
 L = len(hidden_dims)
+all_dims = [d0] + hidden_dims + [n_classes]
 W = {}
 b = {}
-W[1] = np.random.randn(hidden_dims[0], d0) * scale
-b[1] = np.zeros(hidden_dims[0])
-for l in range(2, L+1):
-    scale = np.sqrt(2.0 / hidden_dims[l-2])
-    W[l] = np.random.randn(hidden_dims[l-1], hidden_dims[l-2]) * scale
-    b[l] = np.zeros(hidden_dims[l-1])
-scale = np.sqrt(2.0 / hidden_dims[-1])
-W[L+1] = np.random.randn(n_classes, hidden_dims[-1]) * scale
-b[L+1] = np.zeros(n_classes)
+for l in range(1, L+2):
+    scale = np.sqrt(2.0 / all_dims[l-1])
+    W[l] = np.random.randn(all_dims[l], all_dims[l-1]) * scale
+    b[l] = np.zeros(all_dims[l])
 
 def dist(vec):
     z = vec
@@ -163,10 +158,9 @@ for m in range(1,epochs+1):
     A[L+1] = W[L+1] @ Z[L] + b[L+1][:, np.newaxis]
     Y = np.exp(A[L+1].T)
     Y = np.array([row / np.sum(row) for row in Y])
-    label_mat = np.zeros_like(Y)
-    for i, j in enumerate(train_labels):
-        j = class_int_label[j]
-        label_mat[i,j] = 1
+    label_mat = np.zeros((n_batch, n_classes))
+    label_indices = [class_int_label[label] for label in train_labels]
+    label_mat[np.arange(n_batch), label_indices] = 1
     e[L+1] = Y - label_mat
     for j in range(L,0,-1):
         e[j] = (e[j+1] @ W[j+1]) * np.heaviside(Z[j], 0).T
