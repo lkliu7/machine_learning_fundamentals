@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[     11009,        311]
-NotebookOptionsPosition[     10279,        293]
-NotebookOutlinePosition[     10671,        309]
-CellTagsIndexPosition[     10628,        306]
+NotebookDataLength[      5801,        172]
+NotebookOptionsPosition[      5263,        156]
+NotebookOutlinePosition[      5655,        172]
+CellTagsIndexPosition[      5612,        169]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -102,194 +102,57 @@ Cell[BoxData[{
  CellLabel->
   "In[116]:=",ExpressionUUID->"becbeab1-8a21-448a-8c92-62e9f4f501a2"],
 
-Cell[BoxData[{
+Cell[BoxData[
  RowBox[{
-  RowBox[{"addRightColumn", "[", "matrix_", "]"}], ":=", 
-  RowBox[{
-   RowBox[{"Append", "[", "0.", "]"}], "/@", "matrix"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"addRightColumn", "[", 
-   RowBox[{"matrix_", ",", "k_"}], "]"}], ":=", 
-  RowBox[{"Nest", "[", 
-   RowBox[{"addRightColumn", ",", "matrix", ",", "k"}], "]"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"addLeftColumn", "[", "matrix_", "]"}], ":=", 
-  RowBox[{
-   RowBox[{"Prepend", "[", "0.", "]"}], "/@", "matrix"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"addLeftColumn", "[", 
-   RowBox[{"matrix_", ",", "k_"}], "]"}], ":=", 
-  RowBox[{"Nest", "[", 
-   RowBox[{"addLeftColumn", ",", "matrix", ",", "k"}], "]"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"addTopRow", "[", "matrix_", "]"}], ":=", 
+  RowBox[{"convolutionProduct", "[", 
+   RowBox[{"matrix_", ",", "kernel_"}], "]"}], ":=", 
   RowBox[{"Block", "[", 
    RowBox[{
     RowBox[{"{", 
-     RowBox[{"m", ",", "n"}], "}"}], ",", 
+     RowBox[{"k", ",", "l", ",", "m", ",", "n", ",", "newMatrix"}], "}"}], ",",
+     "\[IndentingNewLine]", 
     RowBox[{
      RowBox[{
       RowBox[{"{", 
-       RowBox[{"m", ",", "n"}], "}"}], "=", 
+       RowBox[{"k", ",", "l"}], "}"}], "=", 
       RowBox[{"Dimensions", "[", "matrix", "]"}]}], ";", 
      "\[IndentingNewLine]", 
-     RowBox[{"Prepend", "[", 
-      RowBox[{"matrix", ",", 
-       RowBox[{"ConstantArray", "[", 
-        RowBox[{"0.", ",", "n"}], "]"}]}], "]"}]}]}], "]"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"addTopRow", "[", 
-   RowBox[{"matrix_", ",", "k_"}], "]"}], ":=", 
-  RowBox[{"Nest", "[", 
-   RowBox[{"addTopRow", ",", "matrix", ",", "k"}], "]"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"addBottomRow", "[", "matrix_", "]"}], ":=", 
-  RowBox[{"Block", "[", 
-   RowBox[{
-    RowBox[{"{", 
-     RowBox[{"m", ",", "n"}], "}"}], ",", 
-    RowBox[{
      RowBox[{
       RowBox[{"{", 
        RowBox[{"m", ",", "n"}], "}"}], "=", 
-      RowBox[{"Dimensions", "[", "matrix", "]"}]}], ";", 
+      RowBox[{"Dimensions", "[", "kernel", "]"}]}], ";", 
      "\[IndentingNewLine]", 
-     RowBox[{"Append", "[", 
-      RowBox[{"matrix", ",", 
-       RowBox[{"ConstantArray", "[", 
-        RowBox[{"0.", ",", "n"}], "]"}]}], "]"}]}]}], "]"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"addBottomRow", "[", 
-   RowBox[{"matrix_", ",", "k_"}], "]"}], ":=", 
-  RowBox[{"Nest", "[", 
-   RowBox[{"addBottomRow", ",", "matrix", ",", "k"}], 
-   "]"}]}], "\[IndentingNewLine]"}], "Input",
- CellChangeTimes->{{3.976205946597794*^9, 3.976205964108201*^9}, {
-  3.9762060133461246`*^9, 3.976206246715003*^9}, {3.976206445387496*^9, 
-  3.9762064464046307`*^9}},ExpressionUUID->"d47b359c-c7e8-4430-97b3-\
-67b63c6d721e"],
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{"m", ",", "n"}], "}"}], "=", 
-   RowBox[{"Dimensions", "[", "W", "]"}]}], ";"}], "\[IndentingNewLine]", 
- RowBox[{"Do", "[", 
-  RowBox[{
-   RowBox[{
-    RowBox[{"newLColumns", "=", 
-     RowBox[{"n", "-", "j"}]}], ";", "\[IndentingNewLine]", 
-    RowBox[{"newTRows", "=", 
-     RowBox[{"m", "-", "i"}]}], ";", "\[IndentingNewLine]", 
-    RowBox[{"newRColumns", "=", 
-     RowBox[{"j", "-", "1"}]}], ";", "\[IndentingNewLine]", 
-    RowBox[{"newBRows", "=", 
-     RowBox[{"i", "-", "1"}]}], ";", "\[IndentingNewLine]", 
-    RowBox[{
-     RowBox[{"MM", "[", 
-      RowBox[{"i", ",", "j"}], "]"}], "=", 
-     RowBox[{
-      RowBox[{"W", "[", 
-       RowBox[{"[", 
-        RowBox[{"i", ",", "j"}], "]"}], "]"}], 
-      RowBox[{"addLeftColumn", "[", 
-       RowBox[{
-        RowBox[{"addTopRow", "[", 
+     RowBox[{"newMatrix", "=", 
+      RowBox[{"ConstantArray", "[", 
+       RowBox[{"0.", ",", 
+        RowBox[{"{", 
          RowBox[{
-          RowBox[{"addRightColumn", "[", 
-           RowBox[{
-            RowBox[{"addBottomRow", "[", 
-             RowBox[{"M", ",", "newBRows"}], "]"}], ",", "newRColumns"}], 
-           "]"}], ",", "newTRows"}], "]"}], ",", "newLColumns"}], "]"}]}]}]}],
-    ",", 
-   RowBox[{"{", 
-    RowBox[{"i", ",", "m"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{"j", ",", "n"}], "}"}]}], "]"}]}], "Input",
- CellChangeTimes->{{3.976206499904334*^9, 3.9762065971040154`*^9}, {
-  3.976206658276273*^9, 3.976206809417328*^9}, {3.976206867927063*^9, 
-  3.97620686922884*^9}, {3.976206943847774*^9, 3.9762069464456882`*^9}, {
-  3.976207099195209*^9, 3.9762071087882547`*^9}},
- CellLabel->
-  "In[107]:=",ExpressionUUID->"1077bab8-d807-4992-8f2e-1bc2246fa644"],
-
-Cell[BoxData[{
- RowBox[{"RepeatedTiming", "[", 
-  RowBox[{
-   RowBox[{"Do", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"newLColumns", "=", 
-       RowBox[{"n", "-", "j"}]}], ";", "\[IndentingNewLine]", 
-      RowBox[{"newTRows", "=", 
-       RowBox[{"m", "-", "i"}]}], ";", "\[IndentingNewLine]", 
-      RowBox[{"newRColumns", "=", 
-       RowBox[{"j", "-", "1"}]}], ";", "\[IndentingNewLine]", 
-      RowBox[{"newBRows", "=", 
-       RowBox[{"i", "-", "1"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"k", "-", "m", "+", "1"}], ",", 
+          RowBox[{"l", "-", "n", "+", "1"}]}], "}"}]}], "]"}]}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"Do", "[", 
       RowBox[{
-       RowBox[{"MM", "[", 
-        RowBox[{"i", ",", "j"}], "]"}], "=", 
-       RowBox[{
-        RowBox[{"W", "[", 
-         RowBox[{"[", 
-          RowBox[{"i", ",", "j"}], "]"}], "]"}], 
-        RowBox[{"addLeftColumn", "[", 
-         RowBox[{
-          RowBox[{"addTopRow", "[", 
-           RowBox[{
-            RowBox[{"addRightColumn", "[", 
-             RowBox[{
-              RowBox[{"addBottomRow", "[", 
-               RowBox[{"M", ",", "newBRows"}], "]"}], ",", "newRColumns"}], 
-             "]"}], ",", "newTRows"}], "]"}], ",", "newLColumns"}], 
-         "]"}]}]}]}], ",", 
-     RowBox[{"{", 
-      RowBox[{"i", ",", "m"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"j", ",", "n"}], "}"}]}], "]"}], ";", 
-   RowBox[{"conv1", "=", 
-    RowBox[{
-     RowBox[{"Sum", "[", 
-      RowBox[{
-       RowBox[{"MM", "[", 
-        RowBox[{"i", ",", "j"}], "]"}], ",", 
-       RowBox[{"{", 
-        RowBox[{"i", ",", "m"}], "}"}], ",", 
-       RowBox[{"{", 
-        RowBox[{"j", ",", "n"}], "}"}]}], "]"}], "[", 
-     RowBox[{"[", 
-      RowBox[{
-       RowBox[{"m", ";;", "28"}], ",", 
-       RowBox[{"n", ";;", "28"}]}], "]"}], "]"}]}], ";"}], "]"}], "\[IndentingNewLine]", 
- RowBox[{"RepeatedTiming", "[", 
-  RowBox[{
-   RowBox[{"conv2", "=", 
-    RowBox[{"Table", "[", 
-     RowBox[{
-      RowBox[{"Total", "[", 
-       RowBox[{
-        RowBox[{"W", " ", 
-         RowBox[{"M", "[", 
+       RowBox[{"newMatrix", "+=", 
+        RowBox[{
+         RowBox[{"kernel", "[", 
+          RowBox[{"[", 
+           RowBox[{"i", ",", "j"}], "]"}], "]"}], 
+         RowBox[{"matrix", "[", 
           RowBox[{"[", 
            RowBox[{
             RowBox[{"i", ";;", 
-             RowBox[{"i", "+", "2"}]}], ",", 
+             RowBox[{"k", "-", "m", "+", "i"}]}], ",", 
             RowBox[{"j", ";;", 
-             RowBox[{"j", "+", "2"}]}]}], "]"}], "]"}]}], ",", "2"}], "]"}], ",", 
-      RowBox[{"{", 
-       RowBox[{"i", ",", 
-        RowBox[{"28", "-", "2"}]}], "}"}], ",", 
-      RowBox[{"{", 
-       RowBox[{"j", ",", 
-        RowBox[{"28", "-", "2"}]}], "}"}]}], "]"}]}], ";"}], "]"}], "\[IndentingNewLine]", 
- RowBox[{"conv1", "==", "conv2"}]}], "Input",
- CellChangeTimes->{{3.9762068379416924`*^9, 3.976206880280352*^9}, {
-  3.976207011606884*^9, 3.9762070766603003`*^9}, {3.976207113336527*^9, 
-  3.976207137661518*^9}, {3.976207229352956*^9, 3.976207229551323*^9}},
+             RowBox[{"l", "-", "n", "+", "j"}]}]}], "]"}], "]"}]}]}], ",", 
+       RowBox[{"{", 
+        RowBox[{"i", ",", "m"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"j", ",", "n"}], "}"}]}], "]"}], ";", "\[IndentingNewLine]", 
+     "newMatrix"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.976221315309025*^9, 3.976221344504764*^9}, 
+   3.9762214350141487`*^9},
  CellLabel->
-  "In[119]:=",ExpressionUUID->"7fcd5fe2-df2a-454e-982d-b1de84ac3cc5"]
+  "In[140]:=",ExpressionUUID->"fca58653-f31e-4634-847c-0491020d8cbf"]
 },
 WindowSize->{1728, 1051},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
@@ -310,9 +173,7 @@ CellTagsIndex->{}
 Notebook[{
 Cell[554, 20, 2200, 61, 172, "Input",ExpressionUUID->"12b745ba-6c5a-4023-8ad9-9da76874d8e2"],
 Cell[2757, 83, 731, 19, 70, "Input",ExpressionUUID->"becbeab1-8a21-448a-8c92-62e9f4f501a2"],
-Cell[3491, 104, 2437, 65, 233, "Input",ExpressionUUID->"d47b359c-c7e8-4430-97b3-67b63c6d721e"],
-Cell[5931, 171, 1626, 43, 131, "Input",ExpressionUUID->"1077bab8-d807-4992-8f2e-1bc2246fa644"],
-Cell[7560, 216, 2715, 75, 172, "Input",ExpressionUUID->"7fcd5fe2-df2a-454e-982d-b1de84ac3cc5"]
+Cell[3491, 104, 1768, 50, 157, "Input",ExpressionUUID->"fca58653-f31e-4634-847c-0491020d8cbf"]
 }
 ]
 *)
