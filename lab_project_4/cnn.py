@@ -140,22 +140,26 @@ def maxpoolD(array, spec):
     pre = (array + shift) / aug - 1
     return (abs(pre) < 1e-10).astype(float)
 
-dims = ((32, 3, 3), (64, 3, 3), (64, 3, 3), 0, 7744, 128, 10)
+dims = ((32, 3, 3), (64, 3, 3), (64, 3, 3), (2, 2), 7744, 128, 10)
 
 W = {}
 b = {}
-scale = np.sqrt(2 / (dims[0][-1] * dims[0][-2]))
-W[1] = np.random.randn(*dims[0]) * scale
-scale = np.sqrt(2 / (dims[0][0] * dims[1][-1] * dims[1][-2]))
-W[2] = np.random.randn(dims[1][0], dims[0][0], *dims[1][1:])
-scale = np.sqrt(2 / (dims[1][0] * dims[2][-1] * dims[2][-2]))
-W[3] = np.random.randn(dims[2][0], dims[1][0], *dims[2][1:])
-scale = np.sqrt(2 / 7744)
-W[5] = np.random.randn(dims[4], 7744) / scale
+kernel_dim = dims[0][-1] * dims[0][-2]
+scale = np.sqrt(2 / kernel_dim)
+W[1] = np.random.randn(kernel_dim, dims[0][0]) * scale
+kernel_dim = dims[0][0] * dims[1][-1] * dims[1][-2]
+scale = np.sqrt(2 / kernel_dim)
+W[2] = np.random.randn(kernel_dim, dims[1][0]) * scale
+kernel_dim = dims[1][0] * dims[2][-1] * dims[2][-2]
+scale = np.sqrt(2 / kernel_dim)
+W[3] = np.random.randn(kernel_dim, dims[2][0])
+input_dim = 64 * 11 * 11
+scale = np.sqrt(2 / input_dim)
+W[5] = np.random.randn(dims[4], 7744) * scale
 b[5] = np.zeros(dims[4])
 scale = np.sqrt(2 / dims[4])
-W[6] = np.random.randn(dims[5], dims[4]) / scale
+W[6] = np.random.randn(dims[5], dims[4]) * scale
 b[6] = np.zeros(dims[5])
 scale = np.sqrt(2 / dims[5])
-W[7] = np.random.randn(dims[6], dims[5]) / scale
+W[7] = np.random.randn(dims[6], dims[5]) * scale
 b[7] = np.zeros(dims[6])
