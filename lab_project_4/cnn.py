@@ -5,14 +5,13 @@ import urllib.request
 import gzip
 import random
 import itertools
-import scipy.signal
+from numpy.lib.stride_tricks import as_strided
 
 # MARK: Configuration
 CONFIG = {
    'epochs': 10,
-   'learning_rate': 1e-1,
-   'update_frequency': 1,
-   'batch_size': 128,
+   'learning_rate': 1e-2,
+   'batch_size': 77,
 }
 
 # MARK: Data Preparation
@@ -116,12 +115,30 @@ class_int_label = {classes[i]: i for i in range(n_classes)}  # {0:0, 1:1, ..., 9
 # Extract hyperparameters from configuration
 epochs = CONFIG['epochs']
 lr = CONFIG['learning_rate']
-update_frequency = CONFIG['update_frequency']
 batch_size = CONFIG['batch_size']
 
 # Get dataset dimensions
 n_train, *input_dim = train_images.shape  # input_dim = (28,28)
 n_test, *_ = test_images.shape
+
+def maxpool(array, spec):
+    dims = array.shape
+    rank = len(dims)
+    if rank != len(spec):
+        raise ValueError()
+    dims = [dims[i] // spec[i] for i in range(rank)]
+    pooled_dims = tuple(zip(dims, spec))
+    pooled_dims = tuple(n for t in pooled_dims for n in t)
+    pooled_array = array.reshape(pooled_dims)
+    pooled_axes = tuple(range(1, 2*rank, 2))
+    return np.max(pooled_array, axis=pooled_axes)
+
+def maxpoolD(array, spec):
+    pooled = maxpool(array, spec)
+    shift = np.max(np.abs(pooled)) / np.sqrt(2)
+    aug = np.kron(pooled, np.ones(spec)) + shift
+    pre = (array + shift) / aug - 1
+    return (abs(pre) < 1e-10).astype(float)
 
 dims = ((32, 3, 3), (64, 3, 3), (64, 3, 3), 0, 7744, 128, 10)
 
@@ -142,6 +159,3 @@ b[6] = np.zeros(dims[5])
 scale = np.sqrt(2 / dims[5])
 W[7] = np.random.randn(dims[6], dims[5]) / scale
 b[7] = np.zeros(dims[6])
-
-
-
