@@ -5,11 +5,11 @@ import urllib.request
 import gzip
 import random
 import itertools
-from numpy.lib.stride_tricks import as_strided
+from numpy.lib.stride_tricks import sliding_window_view
 
 # MARK: Configuration
 CONFIG = {
-   'epochs': 10,
+   'epochs': 50,
    'learning_rate': 1e-2,
    'batch_size': 77,
 }
@@ -152,10 +152,10 @@ scale = np.sqrt(2 / kernel_dim)
 W[2] = np.random.randn(kernel_dim, dims[1][0]) * scale
 kernel_dim = dims[1][0] * dims[2][-1] * dims[2][-2]
 scale = np.sqrt(2 / kernel_dim)
-W[3] = np.random.randn(kernel_dim, dims[2][0])
-input_dim = 64 * 11 * 11
+W[3] = np.random.randn(kernel_dim, dims[2][0]) * scale
+input_dim = dims[2][0] * 11 * 11
 scale = np.sqrt(2 / input_dim)
-W[5] = np.random.randn(dims[4], 7744) * scale
+W[5] = np.random.randn(dims[4], input_dim) * scale
 b[5] = np.zeros(dims[4])
 scale = np.sqrt(2 / dims[4])
 W[6] = np.random.randn(dims[5], dims[4]) * scale
@@ -163,3 +163,136 @@ b[6] = np.zeros(dims[5])
 scale = np.sqrt(2 / dims[5])
 W[7] = np.random.randn(dims[6], dims[5]) * scale
 b[7] = np.zeros(dims[6])
+
+def dist(img):
+    A = sliding_window_view(img, dims[0][1:]).reshape(26, 26, 9) @ W[1]
+    Z = np.maximum(A, 0)
+    A = sliding_window_view(Z, dims[1][1:], axis=(0,1)).reshape(24, 24, dims[0][0] * 9) @ W[2]
+    Z = np.maximum(A, 0)
+    A = sliding_window_view(Z, dims[2][1:], axis=(0,1)).reshape(22, 22, dims[1][0] * 9) @ W[3]
+    Z = np.maximum(A, 0)
+    A = maxpool(Z, (2,2,1))
+    Z = A.flatten()
+    A = W[5] @ Z + b[5]
+    Z = np.maximum(A, 0)
+    A = W[6] @ Z + b[6]
+    Z = np.maximum(A, 0)
+    A = W[7] @ Z + b[7]
+    y = np.exp(A)
+    y = y / np.sum(y)
+    return y
+
+def pred(img):
+    return (classes[dist(img).argmax()])
+
+def batch_dist(imgs, batch_size=512):
+    n_batch = len(imgs)
+    if n_batch > batch_size:
+        batches = itertools.batched(imgs, batch_size)
+        return np.concatenate([batch_dist(batch, batch_size) for batch in batches])
+    A = sliding_window_view(imgs, dims[0][1:], axis=(1,2)).reshape(n_batch, 26, 26, 9) @ W[1]
+    Z = np.maximum(A, 0)
+    A = sliding_window_view(Z, dims[1][1:], axis=(1,2)).reshape(n_batch, 24, 24, dims[0][0] * 9) @ W[2]
+    Z = np.maximum(A, 0)
+    A = sliding_window_view(Z, dims[2][1:], axis=(1,2)).reshape(n_batch, 22, 22, dims[1][0] * 9) @ W[3]
+    Z = np.maximum(A, 0)
+    A = maxpool(Z, (1,2,2,1))
+    Z = np.array([a.flatten() for a in A])
+    A = Z @ W[5].T + b[5]
+    Z = np.maximum(A, 0)
+    A = Z @ W[6].T + b[6]
+    Z = np.maximum(A, 0)
+    A = Z @ W[7].T + b[7]
+    A = np.array([a - a.max() for a in A])
+    y = np.exp(A)
+    y = y / np.sum(y, axis=1, keepdims=True)
+    return y
+
+def batch_pred(imgs):
+    dists = batch_dist(imgs)
+    return ([classes[dist.argmax()] for dist in dists])
+
+train_preds = batch_pred(train_images)
+matches = (train_preds == train_labels)
+acc = [(0, np.sum(matches) / n_train)]
+test_preds = batch_pred(test_images)
+test_matches = (test_preds == test_labels)
+test_acc = [(0, np.sum(test_matches) / n_test)]
+
+for epoch in range(epochs):
+    if epoch == 10:
+        lr = lr / 10
+    if epoch == 25:
+        lr = lr / 10
+    shuffle = random.sample(range(n_train), n_train)
+    batches = itertools.batched(shuffle, batch_size)
+    for batch in batches:
+        batch = list(batch)
+        n_batch = len(batch)
+        data_batch = train_images[batch]
+        batch_labels = train_labels[batch]
+        batch_labels = [class_int_label[i] for i in batch_labels]
+        constructed_W = {}
+        constructed_W[3] = np.transpose(W[3].reshape(dims[1][0], 9, dims[2][0])[:,::-1,:].reshape(dims[1][0], 9 * dims[2][0]))
+        constructed_W[2] = np.transpose(W[2].reshape(dims[0][0], 9, dims[1][0])[:,::-1,:].reshape(dims[0][0], 9 * dims[1][0]))
+        Z = {}
+        A = {}
+        e = {}
+        gradW = {}
+        gradb = {}
+        g = {}
+        Z[0] = data_batch
+        A[1] = sliding_window_view(Z[0], (3,3), axis=(1,2)).reshape(n_batch, 26, 26, 3*3) @ W[1]
+        Z[1] = np.maximum(A[1], 0)
+        A[2] = sliding_window_view(Z[1], (3,3), axis=(1,2)).reshape(n_batch, 24, 24, dims[0][0]*3*3) @ W[2]
+        Z[2] = np.maximum(A[2], 0)
+        A[3] = sliding_window_view(Z[2], (3,3), axis=(1,2)).reshape(n_batch, 22, 22, dims[1][0]*3*3) @ W[3]
+        Z[3] = np.maximum(A[3], 0)
+        A[4] = maxpool(Z[3], (1,2,2,1))
+        Z[4] = A[4].reshape(n_batch, 11 * 11 * dims[2][0])
+        A[5] = Z[4] @ W[5].T + b[5]
+        Z[5] = np.maximum(A[5], 0)
+        A[6] = Z[5] @ W[6].T + b[6]
+        Z[6] = np.maximum(A[6], 0)
+        A[7] = Z[6] @ W[7].T + b[7]
+        A[7] = np.array([a - a.max() for a in A[7]])
+        y = np.exp(A[7])
+        y = y / np.sum(y, axis=1, keepdims=True)
+        label_mat = np.zeros((n_batch, n_classes))
+        label_indices = [class_int_label[label] for label in batch_labels]
+        label_mat[np.arange(n_batch), label_indices] = 1
+        e[7] = y - label_mat
+        e[6] = (e[7] @ W[7]) * np.heaviside(Z[6], 0)
+        e[5] = (e[6] @ W[6]) * np.heaviside(Z[5], 0)
+        e[4] = e[5] @ W[5]
+        e[3] = maxpoolD(Z[3], (1,2,2,1)) * np.kron(np.ones((2,2,1)), e[4].reshape(n_batch, 11, 11, dims[2][0])) * np.heaviside(Z[3], 0)
+        e[2] = np.transpose(sliding_window_view(np.pad(e[3], ((0,0), (2,2), (2,2), (0,0))), (3,3), axis=(1,2)), (0,1,2,4,5,3)).reshape(n_batch, 24, 24, 9 * dims[2][0]) @ constructed_W[3]
+        e[2] = e[2] * np.heaviside(Z[2], 0)
+        e[1] = np.transpose(sliding_window_view(np.pad(e[2], ((0,0), (2,2), (2,2), (0,0))), (3,3), axis=(1,2)), (0,1,2,4,5,3)).reshape(n_batch, 26, 26, 9 * dims[1][0]) @ constructed_W[2]
+        e[1] = e[1] * np.heaviside(Z[1], 0)
+        gradW[7] = e[7].T @ Z[6]
+        gradb[7] = np.sum(e[7], axis=0)
+        gradW[6] = e[6].T @ Z[5]
+        gradb[6] = np.sum(e[6], axis=0)
+        gradW[5] = e[5].T @ Z[4]
+        gradb[5] = np.sum(e[5], axis=0)
+        g[3] = np.tensordot(sliding_window_view(Z[2], (22, 22), axis=(1,2)), e[3], ([0,4,5], [0,1,2]))
+        g[2] = np.tensordot(sliding_window_view(Z[1], (24, 24), axis=(1,2)), e[2], ([0,4,5], [0,1,2]))
+        g[1] = np.tensordot(sliding_window_view(Z[0], (26, 26), axis=(1,2)), e[1], ([0,3,4], [0,1,2]))
+        gradW[3] = np.transpose(g[3], (2,0,1,3)).reshape(dims[1][0] * 9, dims[2][0])
+        gradW[2] = np.transpose(g[2], (2,0,1,3)).reshape(dims[0][0] * 9, dims[1][0])
+        gradW[1] = g[1].reshape(9, dims[0][0])
+        for k in W:
+            W[k] -= lr * gradW[k] / n_batch
+        for k in b:
+            b[k] -= lr * gradb[k] / n_batch
+
+    train_preds = batch_pred(train_images)
+    matches = (train_preds == train_labels)
+    acc.append((epoch + 1, np.sum(matches) / n_train))
+    test_preds = batch_pred(test_images)
+    test_matches = (test_preds == test_labels)
+    test_acc.append((epoch + 1, np.sum(test_matches) / n_test))
+    print(acc)
+    print(test_acc)
+
