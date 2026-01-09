@@ -293,6 +293,21 @@ for epoch in range(epochs):
     test_preds = batch_pred(test_images)
     test_matches = (test_preds == test_labels)
     test_acc.append((epoch + 1, np.sum(test_matches) / n_test))
-    print(acc)
-    print(test_acc)
+    print(f'Training accuracy after epoch {epoch + 1}: {acc[-1]}')
+    print(f'Test accuracy after epoch {epoch + 1}: {test_acc[-1]}')
 
+iters, accuracies = zip(*acc[1:])
+_, test_accuracies = zip(*test_acc[1:])
+
+plt.plot(iters, accuracies, label='Training Accuracy')
+plt.plot(iters, test_accuracies, label='Test Accuracy')
+plt.xlabel('Iteration')
+plt.ylabel('Accuracy')
+plt.title('Accuracy History')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Print final training and test accuracies
+print(f'Final training accuracy: {acc[-1]}')
+print(f'Final test accuracy: {test_acc[-1]}')
