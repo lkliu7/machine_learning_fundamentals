@@ -24,15 +24,9 @@ eigs=Eigenvalues[mat];
 runningTotal=Accumulate[eigs];
 SelectFirst[runningTotal,#>=0.98runningTotal[[-1]]&->"Index"]
 totalDistortion[A_,set_]:=Block[{mean=meanVec[set],proj=Transpose[A] . A},Sum[Block[{hey=vec[img]-mean},Norm[proj . hey-hey]^2],{img,set}]]
-totalDistortionP[A_,set_]:=Block[{mean=meanVecP[set],proj,result},
-ParallelEvaluate[result=0];
-ParallelEvaluate[proj=Transpose[A] . A];
-ParallelDo[Block[{hey=vec[img]-mean},result+=Norm[proj . hey-hey]^2],{img,set},Method->"CoarsestGrained"];
-Total[ParallelEvaluate[result]]];
 dim=10;
 A=pca[mat,dim];
 AbsoluteTiming[totalDistortion[A,data]]
-AbsoluteTiming[totalDistortionP[A,data]]
 Table[totalDistortion[pca[mat,dim],data],{dim,{2,10,50,100,200,300}}]
 A2=pca[mat,2];
 ListPlot[Transpose[A2 . Transpose[vec/@group[#]]]&/@nums]
@@ -46,7 +40,6 @@ B2=Chop[lda[2]];
 ListPlot[Transpose[B2 . Transpose[vec/@group[#]]]&/@nums,ImageSize->Full]
 B3=Chop[lda[3]];
 ListPointPlot3D[Transpose[B3 . Transpose[vec/@group[#]]]&/@nums,ImageSize->Full]
-
 
 
 
