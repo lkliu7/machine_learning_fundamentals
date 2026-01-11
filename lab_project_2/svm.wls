@@ -131,7 +131,21 @@ b=y[[pos]]-w . X[[pos]];
 
 pred[w_,x_,b_]:=Sign[w . x+b]
 predData[w_,data_,b_]:=Sign[data . w+b]
-N[Count[predData[w,X[[;;trainSize[nums[[1]]]]],b],1]/trainSize[nums[[1]]]]
-N[Count[predData[w,X[[-trainSize[nums[[2]]];;]],b],-1]/trainSize[nums[[2]]]]
-N[Count[predData[w,(vec/@groupTest[nums[[1]]]),b],1]/testSize[nums[[1]]]]
-N[Count[predData[w,(vec/@groupTest[nums[[2]]]),b],-1]/testSize[nums[[2]]]]
+
+(* Final SVM accuracies *)
+trainAcc1 = N[Count[predData[w,X[[;;trainSize[nums[[1]]]]],b],1]/trainSize[nums[[1]]]];
+trainAcc2 = N[Count[predData[w,X[[-trainSize[nums[[2]]];;]],b],-1]/trainSize[nums[[2]]]];
+testAcc1 = N[Count[predData[w,(vec/@groupTest[nums[[1]]]),b],1]/testSize[nums[[1]]]];
+testAcc2 = N[Count[predData[w,(vec/@groupTest[nums[[2]]]),b],-1]/testSize[nums[[2]]]];
+
+Print["=== SVM Final Results ==="]
+Print["Dual formulation SVM accuracies for digits ", nums[[1]], " vs ", nums[[2]], ":"]
+Print["Train digit ", nums[[1]], " accuracy: ", trainAcc1]
+Print["Train digit ", nums[[2]], " accuracy: ", trainAcc2]
+Print["Test digit ", nums[[1]], " accuracy: ", testAcc1]
+Print["Test digit ", nums[[2]], " accuracy: ", testAcc2]
+Print["Overall train accuracy: ", (trainAcc1 * trainSize[nums[[1]]] + trainAcc2 * trainSize[nums[[2]]]) / (trainSize[nums[[1]]] + trainSize[nums[[2]]])]
+Print["Overall test accuracy: ", (testAcc1 * testSize[nums[[1]]] + testAcc2 * testSize[nums[[2]]]) / (testSize[nums[[1]]] + testSize[nums[[2]]])]
+
+
+
