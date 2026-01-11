@@ -1,3 +1,6 @@
+#!/usr/bin/env wolframscript
+(* ::Package:: *)
+
 mnist=ResourceData["MNIST","TrainingData"];
 mnistTest=ResourceData["MNIST","TestData"];
 group[i_]:=group[i]=Select[mnist,#[[2]]==i&][[All,1]]
@@ -12,8 +15,8 @@ oneminuslC=Compile[{{x,_Real,1}},1-1/(1+E^-x)];
 llC=Compile[{{x,_Real,1}},Log[1/(1+E^-x)]];
 X=vec/@data;
 y=Join[ConstantArray[1,Length[group[nums[[1]]]]],ConstantArray[-1,Length[group[nums[[2]]]]]];
-error[w_]:=-Total[llC[y X.w]]
-grad[w_]:=Block[{p=oneminuslC[y X.w]},-(y p).X]
+error[w_]:=-Total[llC[y X . w]]
+grad[w_]:=Block[{p=oneminuslC[y X . w]},-(y p) . X]
 lr=1 10^-4;
 iters=100000;
 w=ConstantArray[0,784];
@@ -29,7 +32,7 @@ If[Mod[i,1000]==0,Print[i," ",currentError]];
 If[Abs[prevError/currentError-1]<tol,Print["converged at iteration ", i];Break[]];
 prevError=currentError,{i,iters}]]
 batchSize=64;
-batchGrad[w_,vecs_,labels_]:=Block[{p=oneminuslC[labels vecs.w]},-(labels p).vecs]
+batchGrad[w_,vecs_,labels_]:=Block[{p=oneminuslC[labels vecs . w]},-(labels p) . vecs]
 batchSGD[batchSize_,lr_]:=Block[{batches=Partition[RandomSample[Range[n]],batchSize]},
 Do[wSGD-=lr batchGrad[wSGD,X[[batch]],y[[batch]]],{batch,batches}]]
 lr=1 10^-4;
@@ -42,8 +45,8 @@ currentError=error[wSGD];
 If[Mod[i,1000]==0,Print[i," ",currentError]];
 If[Abs[prevError/currentError-1]<tol,Print["converged at iteration ", i];Break[]];
 prevError=currentError,{i,iters}]]
-pred[w_,x_]:=Sign[w.x]
-predData[w_,data_]:=Sign[data.w]
+pred[w_,x_]:=Sign[w . x]
+predData[w_,data_]:=Sign[data . w]
 trainAcc1=N[Count[predData[w,X[[;;trainSize[nums[[1]]]]]],1]/trainSize[nums[[1]]]]
 trainAcc2=N[Count[predData[w,X[[-trainSize[nums[[2]]];;]]],-1]/trainSize[nums[[2]]]]
 testAcc1=N[Count[predData[w,(vec/@groupTest[nums[[1]]])],1]/testSize[nums[[1]]]]
@@ -52,8 +55,11 @@ trainAccSGD1=N[Count[predData[wSGD,X[[;;trainSize[nums[[1]]]]]],1]/trainSize[num
 trainAccSGD2=N[Count[predData[wSGD,X[[-trainSize[nums[[2]]];;]]],-1]/trainSize[nums[[2]]]]
 testAccSGD1=N[Count[predData[wSGD,(vec/@groupTest[nums[[1]]])],1]/testSize[nums[[1]]]]
 testAccSGD2=N[Count[predData[wSGD,(vec/@groupTest[nums[[2]]])],-1]/testSize[nums[[2]]]]
-Print[{error[w],error[wSGD]}]
-Print[{trainAcc1,trainAcc2,testAcc1,testAcc2}]
-Print[{trainAccSGD1,trainAccSGD2,testAccSGD1,testAccSGD2}]
+Print["Negative log-likelihood - Full GD: ",error[w],", SGD: ",error[wSGD]]
+Print["Full GD accuracies - Train digit ",nums[[1]],": ",trainAcc1,", Train digit ",nums[[2]],": ",trainAcc2,", Test digit ",nums[[1]],": ",testAcc1,", Test digit ",nums[[2]],": ",testAcc2]
+Print["SGD accuracies - Train digit ",nums[[1]],": ",trainAccSGD1,", Train digit ",nums[[2]],": ",trainAccSGD2,", Test digit ",nums[[1]],": ",testAccSGD1,", Test digit ",nums[[2]],": ",testAccSGD2]
 
 (* :!CodeAnalysis::EndBlock:: *)
+
+
+
