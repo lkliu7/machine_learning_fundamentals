@@ -45,39 +45,95 @@ This repository contains from-scratch implementations of core ML algorithms usin
 - Regularization for numerical stability
 - Bias term handling in predictions
 
+### Lab Project III: Word Representations
+**Dataset:** enwik8 text corpus + WordSim353 evaluation
+
+**Implemented Methods:**
+- Co-occurrence matrix construction with context windows
+- Truncated Singular Value Decomposition (SVD) for dimensionality reduction
+- Word2Vec-style embedding learning via alternating optimization
+- Stochastic Gradient Descent (SGD) for embedding optimization
+
+**Key Features:**
+- Multiple embedding dimensions (20, 50, 100)
+- Word similarity evaluation using Spearman correlation
+- Memory-efficient sparse matrix operations
+- Preprocessing pipeline for large text corpora
+
+### Lab Project IV: Neural Networks
+**Dataset:** MNIST handwritten digits
+
+**Implemented Architectures:**
+- **Fully Connected Neural Network:**
+  - Configurable hidden layer dimensions
+  - ReLU activation functions
+  - He weight initialization
+  - Cross-entropy loss with softmax output
+
+- **Convolutional Neural Network (CNN):**
+  - 3 convolutional layers (customizable kernel counts: 32, 64, 64)
+  - Fixed 3×3 convolution kernels and 2×2 max pooling
+  - Sliding window implementation for convolution operations
+  - Custom max pooling with derivative computation
+  - 2 fully connected layers (customizable dimensions)
+
+**Implementation Details:**
+- Manual backpropagation for both architectures
+- Sliding window convolution without convolution libraries
+- Learning rate scheduling (decay at epochs 10 and 25)
+- Batch processing for memory efficiency
+- Numerical stabilization in softmax computations
+
 ## Project Structure
 ```
 ├── lab_project_1/          # Feature extraction
 │   ├── pca.py              # Python implementation
 │   ├── pca.nb              # Mathematica notebook
 │   └── pca.wls             # Mathematica script
-└── lab_project_2/          # Discriminative models
-    ├── linear_regression.py
-    ├── linear_regression.nb
-    ├── logistic_regression.py
-    ├── logistic_regression.nb
-    ├── mce.py
-    ├── mce.nb
-    ├── svm.py
-    └── svm.nb
+├── lab_project_2/          # Discriminative models
+│   ├── linear_regression.py
+│   ├── linear_regression.nb
+│   ├── logistic_regression.py
+│   ├── logistic_regression.nb
+│   ├── mce.py
+│   ├── mce.nb
+│   ├── svm.py
+│   └── svm.nb
+├── lab_project_3/          # Word representations
+│   ├── word_representations.py
+│   └── word_representations.nb
+└── lab_project_4/          # Neural networks
+    ├── fully_connected_nn.py
+    ├── fully_connected_nn.nb
+    ├── cnn.py
+    └── cnn.nb
 ```
 
 ## Installation
 
 ### Python Dependencies
 ```bash
+# Core dependencies for all projects
 pip install numpy matplotlib
+
+# Additional dependencies for specific projects
+pip install unidecode scipy scikit-learn  # Lab Project 3: Word representations
 ```
 
 ### Data Download
-MNIST data is automatically downloaded on first run from:
+**MNIST data** is automatically downloaded on first run from:
 - https://github.com/fgnt/mnist/
+
+**For Lab Project 3 (Word Representations):**
+- `enwik8` text corpus (download manually from http://mattmahoney.net/dc/enwik8.zip)
+- `wordsim353crowd.csv` evaluation dataset (included or download from WordSim-353)
 
 ## Usage
 
 ### Python Implementations
 
 Each implementation can be run directly and includes configuration at the top:
+
 ```python
 # Example: Running SVM classifier
 CONFIG = {
@@ -88,8 +144,22 @@ CONFIG = {
     'batch_size': 64,
 }
 ```
+
+```python
+# Example: Running CNN
+CONFIG = {
+    'epochs': 50,
+    'learning_rate': 1e-2,
+    'batch_size': 77,
+}
+```
+
 ```bash
+# Run individual implementations
 python lab_project_2/svm.py
+python lab_project_3/word_representations.py
+python lab_project_4/cnn.py
+python lab_project_4/fully_connected_nn.py
 ```
 
 ### Mathematica Implementations
@@ -114,8 +184,6 @@ wolframscript -file lab_project_1/pca.wls
 
 ## In Progress
 
-- Lab Project III: Natural Language Processing
-- Lab Project IV: Neural Networks
 - Lab Project V: Ensemble Learning
 - Lab Project VI: Multivariate Gaussian Models
 
