@@ -53,8 +53,8 @@ trainAccSGD1=N[Count[predData[wSGD,X[[;;trainSize[nums[[1]]]]]],1]/trainSize[num
 trainAccSGD2=N[Count[predData[wSGD,X[[-trainSize[nums[[2]]];;]]],-1]/trainSize[nums[[2]]]]
 testAccSGD1=N[Count[predData[wSGD,(vec/@groupTest[nums[[1]]])],1]/testSize[nums[[1]]]]
 testAccSGD2=N[Count[predData[wSGD,(vec/@groupTest[nums[[2]]])],-1]/testSize[nums[[2]]]]
-Print[{error[w],error[wSGD]}]
-Print[{trainAcc1,trainAcc2,testAcc1,testAcc2}]
-Print[{trainAccSGD1,trainAccSGD2,testAccSGD1,testAccSGD2}]
+Print["MCE loss - Full GD: ",error[w],", SGD: ",error[wSGD]]
+Print["Full GD accuracies - Train digit ",nums[[1]],": ",trainAcc1,", Train digit ",nums[[2]],": ",trainAcc2,", Test digit ",nums[[1]],": ",testAcc1,", Test digit ",nums[[2]],": ",testAcc2]
+Print["SGD accuracies - Train digit ",nums[[1]],": ",trainAccSGD1,", Train digit ",nums[[2]],": ",trainAccSGD2,", Test digit ",nums[[1]],": ",testAccSGD1,", Test digit ",nums[[2]],": ",testAccSGD2]
 
 (* :!CodeAnalysis::EndBlock:: *)
