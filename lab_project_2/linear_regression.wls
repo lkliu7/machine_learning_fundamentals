@@ -58,9 +58,9 @@ trainAccExact1=N[Count[predData[wExact,X[[;;trainSize[nums[[1]]]]]],1]/trainSize
 trainAccExact2=N[Count[predData[wExact,X[[-trainSize[nums[[2]]];;]]],-1]/trainSize[nums[[2]]]]
 testAccExact1=N[Count[predData[wExact,(vec/@groupTest[nums[[1]]])],1]/testSize[nums[[1]]]]
 testAccExact2=N[Count[predData[wExact,(vec/@groupTest[nums[[2]]])],-1]/testSize[nums[[2]]]]
-Print[{error[w],error[wSGD],error[wExact]}]
-Print[{trainAcc1,trainAcc2,testAcc1,testAcc2}]
-Print[{trainAccSGD1,trainAccSGD2,testAccSGD1,testAccSGD2}]
-Print[{trainAccExact1,trainAccExact2,testAccExact1,testAccExact2}]
+Print["Training errors - Full GD: ",error[w],", SGD: ",error[wSGD],", Exact: ",error[wExact]]
+Print["Full GD accuracies - Train digit ",nums[[1]],": ",trainAcc1,", Train digit ",nums[[2]],": ",trainAcc2,", Test digit ",nums[[1]],": ",testAcc1,", Test digit ",nums[[2]],": ",testAcc2]
+Print["SGD accuracies - Train digit ",nums[[1]],": ",trainAccSGD1,", Train digit ",nums[[2]],": ",trainAccSGD2,", Test digit ",nums[[1]],": ",testAccSGD1,", Test digit ",nums[[2]],": ",testAccSGD2]
+Print["Exact solution accuracies - Train digit ",nums[[1]],": ",trainAccExact1,", Train digit ",nums[[2]],": ",trainAccExact2,", Test digit ",nums[[1]],": ",testAccExact1,", Test digit ",nums[[2]],": ",testAccExact2]
 
 (* :!CodeAnalysis::EndBlock:: *)
