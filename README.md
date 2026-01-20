@@ -173,8 +173,6 @@ wolframscript -file lab_project_1/pca.wls
 
 1. **First-principles implementation:** Build from mathematical foundations using only linear algebra operations
 2. **No ML libraries:** Implementations use only NumPy/Mathematica for matrix operations
-3. **Systematic debugging:** Adversarial testing and methodical issue isolation
-4. **Learning velocity:** Balance between depth and forward progress
 
 ## Technical Notes
 
